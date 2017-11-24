@@ -14,6 +14,7 @@ Generates all the necessary headers and calls g++ for all the linked files
 Implies semicolons from endlines,
 implies {} using identation,
 implies function argument types based on previous:
+```
 	This:
 	int somefunction(int someArgument, someArgument2)
 		someCode
@@ -23,8 +24,9 @@ implies function argument types based on previous:
 		someCode;
 	}
 	Is compiled and then removed
-	
+```
 Can imply parenthesis on if, switch and loop:
+```
 	This:
 	if x > 0
 		doSomething
@@ -53,3 +55,4 @@ Can imply parenthesis on if, switch and loop:
 	if(somethingCondition){
 		...
 	}
+```
