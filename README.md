@@ -1,7 +1,7 @@
 # CPY
 To create the executable simply compile the source code, "g++ *.cpp -o cpy" on the source folder gets the job done
 
-CPY is a (Pre)Compiler of .cpy files, it compiles code C/C++ withought curly brackets, semicolons, headers and some parenthesis
+CPY is a (Pre)Compiler of .cpy files, it compiles code C++ withought curly brackets, semicolons, headers and some parenthesis
 Simply execute the compiler followed by your source folder and it will create the executable
 
 In any of the given examples, "cpy main.cpy" will create a working executable
@@ -55,4 +55,19 @@ Can imply parenthesis on if, switch and loop:
 	if(somethingCondition){
 		...
 	}
+```
+
+Can be compiled alongside normal cpp files and has some safety features to block deletion of other source files
+Currently it is possible to have some .cpy files and some .cpp, it will create .cpp and .h files from .cpy only if they are not present or procedurally generated (if you choose to keep them with -k), linking doesn't edit files, so it is (untested) possible to compile a complete cpp project running "cpy main.cpp"
+
+```
+USAGE: cmp SourceCode Flags
+Flags:
+        -h: Shows this help page
+        -b: Use line breaks on itermediate code
+        -k: Keeps intermediate code
+        -r: Automatically runs compiled code
+        -nc: Doesn't compile resulting code
+        -o target: Specifies target executable name, when not specified target = a
+        -OtherFlags: Redirects flag to underlying compiler (g++)
 ```
