@@ -298,7 +298,8 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 		
 		bool empty = isEmptyLine(buff);
 		while(empty){
-			fgets (buff2, LINESZ, input);
+			if(!fgets (buff2, LINESZ, input))
+				break;
 			if(buff[buffLen-2] == '\\'){
 				buff[buffLen-2] = '\n';
 				buff[buffLen-1] = '\0';
