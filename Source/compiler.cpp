@@ -144,7 +144,7 @@ int main(int argc, char ** argv){
 	char compilation[LINESZ] = "g++ ";
 	
 	if(argc < 2){
-		printf("USAGE: %s SourceCode Flags", argv[0]);
+		printf("USAGE: %s SourceCode Flags\n", argv[0]);
 		exit(0);
 	}
 	
