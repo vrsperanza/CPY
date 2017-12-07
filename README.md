@@ -1,5 +1,5 @@
 # CPY
-To create the executable simply compile the source code, "g++ *.cpp -o cpy" on the source folder gets the job done
+To create the executable simply run make on the source folder
 
 CPY is a (Pre)Compiler of .cpy files, it compiles code C++ withought curly brackets, semicolons, headers and some parenthesis
 Simply execute the compiler followed by your source folder and it will create the executable
