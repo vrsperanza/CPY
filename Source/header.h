@@ -9,5 +9,6 @@ using namespace std;
 #include <string.h>
 void generateHeader(char * inputFile, char * outputFile);
 vector<string> getDependencies(char * inputFile);
+void replaceRawIncludes(char * filename);
 
 #endif

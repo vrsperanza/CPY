@@ -3,12 +3,14 @@
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
-#include "parser.h"
-#include "header.h"
 #include <vector>
 #include <set>
 #include <map>
 #include <stack>
+
+#include "parser.h"
+#include "header.h"
+#include "compiler.h"
 
 using namespace std;
 char path[LINESZ] = "";
@@ -95,9 +97,7 @@ bool isOverwritable(char * fileName){
 	return true;
 }
 
-void placeAutoTag(char * fileName){
-	char *file_contents;
-	long input_file_size;
+void placeAutoTag(char * fileName){		
 	FILE *input = fopen(fileName, "r");
 	if(input == NULL){
 		printf("COULD NOT OPEN FILE %s", fileName);
@@ -109,7 +109,7 @@ void placeAutoTag(char * fileName){
 	char buff[LINESZ];
 	fgets (buff, LINESZ, input);
 	
-	char autoTag[] = " //AutoTag\n";
+	char autoTag[] = "//AutoTag\n";
 	
 	int len = strlen(buff);
 	if(buff[len-1] == '\n')
@@ -117,26 +117,29 @@ void placeAutoTag(char * fileName){
 	strcat(buff, autoTag);
 	
 	fprintf(result, "%s", buff);
-	while (fgets (buff, LINESZ, input))
+	while (fgets (buff, LINESZ, input)){
 		fprintf(result, "%s", buff);
+	}
 	
 	fclose(input);
 	fclose(result);
-	
 	remove(fileName);
 	rename("temp.autocpp", fileName);
 	return;
 }
 
 int main(int argc, char ** argv){	
-	int i, j;
-	
-	char source[LINESZ];
-	char target[LINESZ] = "a";
+
 	bool beauty = false;
 	bool clear = true;
 	bool run = false;
 	bool compile = true;
+	bool generateHeaders = true;
+	
+	int i, j;
+	
+	char source[LINESZ];
+	char target[LINESZ] = "a";
 	
 	char compilation[LINESZ] = "g++ ";
 	
@@ -177,12 +180,14 @@ int main(int argc, char ** argv){
 		} else if(strcmp("-r", argument) == 0 || strcmp("-run", argument) == 0){
 			run = true;
 			compile = true;
-		} else if(strcmp("-nc", argument) == 0 || strcmp("-autocomp", argument) == 0 || strcmp("-nocompile", argument) == 0){
+		} else if(strcmp("-nc", argument) == 0|| strcmp("-nocompile", argument) == 0){
 			compile = false;
 			run = false;
-		} else if(strcmp("-h", argument) == 0 || strcmp("-help", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
+		} else if(strcmp("-nh", argument) == 0 || strcmp("-noheader", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
+			generateHeaders = false;
+		}else if(strcmp("-h", argument) == 0 || strcmp("-help", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
 			printHelp();
-		} else {
+		}  else {
 			strcat(compilation, argv[i]);
 			strcat(compilation, " ");
 		}
@@ -222,19 +227,12 @@ int main(int argc, char ** argv){
 		if(isOverwritable(cppFile))
 			if(fileExist(sourceFile)){
 				generateSource(sourceFile, cppFile, beauty);
-				wroteCppFile = true;
+				if(isOverwritable(headerFile) && generateHeaders)
+					generateHeader(cppFile, headerFile);
+				placeAutoTag(cppFile);
 			}
 			else
 				printf("Required file: %s not found", sourceFile);
-		
-		if(wroteCppFile && isOverwritable(headerFile))
-			if(fileExist(sourceFile))
-				generateHeader(cppFile, headerFile);
-			else
-				printf("Required file: %s not found", sourceFile);
-		
-		if(wroteCppFile)
-			placeAutoTag(cppFile);
 		
 		dependence = getDependencies(cppFile);
 		
@@ -252,6 +250,16 @@ int main(int argc, char ** argv){
 		}
 	}
 	
+	for(string fileName : filesDone){
+		char cppFile[100];
+		char headerFile[100];
+		stringToCPP(fileName, cppFile);
+		stringToH(fileName, headerFile);
+		
+		replaceRawIncludes(cppFile);
+		replaceRawIncludes(headerFile);
+	}
+
 	if(compile){
 		system(compilation);
 	}
@@ -263,9 +271,9 @@ int main(int argc, char ** argv){
 			stringToCPP(fileName, cppFile);
 			stringToH(fileName, headerFile);
 			
-			if(isOverwritable(cppFile))
+			if(fileExist(cppFile) && isOverwritable(cppFile))
 				remove(cppFile);
-			if(isOverwritable(headerFile))
+			if(fileExist(headerFile) && isOverwritable(headerFile))
 				remove(headerFile);
 		}
 	}
