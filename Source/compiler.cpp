@@ -71,6 +71,7 @@ void printHelp(){
 	printf("\t-k: Keeps intermediate code\n");
 	printf("\t-r: Automatically runs compiled code\n");
 	printf("\t-nc: Doesn't compile resulting code\n");
+	printf("\t-nh: Doesn't create headers\n");
 	printf("\t-o target: Specifies target executable name, when not specified target = a\n");
 	printf("\t-OtherFlags: Redirects flag to underlying compiler\n");
 	exit(0);

@@ -90,6 +90,7 @@ Flags:
         -k: Keeps intermediate code
         -r: Automatically runs compiled code
         -nc: Doesn't compile resulting code
+        -nh: Doesn't create headers
         -o target: Specifies target executable name, when not specified target = a
         -OtherFlags: Redirects flag to underlying compiler (g++)
 ```
