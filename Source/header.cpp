@@ -84,7 +84,7 @@ void generateHeader(char * inputFile, char * outputFile){
 			else if(buff[i] == '*' && buff[i+1] == '/') multiLineComment = false;
 		}
 		
-		if(bracketsCount == 0 && !includedSelf){
+		if(bracketsCount == 0 && !includedSelf && !multiLineComment){
 			for(i = 0; buff[i] == ' ' || buff[i] == '\t'; i++);
 			if(buff[i] == '\n'){
 				fprintf(temp, "#include \"%s\"", inputFileHeader);

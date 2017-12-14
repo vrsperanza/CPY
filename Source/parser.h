@@ -7,7 +7,7 @@
 #include <stack>
 using namespace std;
 
-#define LINESZ 1024
+#define LINESZ 16384
 #define tabSpaces 4
 
 void generateSource(char * inputFile, char * outputFile, bool beauty = false);

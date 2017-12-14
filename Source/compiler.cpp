@@ -11,9 +11,6 @@
 #include <stack>
 
 using namespace std;
-
-#define LINESZ 1024
-#define tabSpaces 4
 char path[LINESZ] = "";
 
 bool fileExist (char * filename){
@@ -256,9 +253,7 @@ int main(int argc, char ** argv){
 	}
 	
 	if(compile){
-		printf("Compilation...\n");
 		system(compilation);
-		printf("Compilation complete\n");
 	}
 	
 	if(clear){

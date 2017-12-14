@@ -1,4 +1,8 @@
 #include "parser.h"
+#include <unordered_set>
+#include <vector>
+#include <iostream>
+using namespace std;
 
 char stringif[] = "if";
 char stringelse[] = "else";
@@ -7,6 +11,7 @@ char stringwhile[] = "while";
 char stringswitch[] = "switch";
 char stringStruct[] = "struct";
 char stringTypedef[] = "typedef";
+char stringAutoWithSpace[] = "auto ";
 
 FILE * input;
 FILE * output;
@@ -14,6 +19,7 @@ FILE * output;
 int i, j;
 
 stack<int> offSets;
+vector<unordered_set<string> > seenWords;
 
 bool multiLineComment;
 char buff[LINESZ];
@@ -52,6 +58,21 @@ void strInsert(char * dest, char * insert, int index){
 	char destCpy[LINESZ];
 	strcpy(destCpy, dest);
 	int len = strlen(insert);
+	int i;
+	for(i = index; dest[i] != '\0'; i++){
+		dest[i + len] = destCpy[i];
+	}	
+	dest[i + len + 1] = '\0';
+	
+	for(i = 0; insert[i] != '\0'; i++){
+		dest[i+index] = insert[i];
+	}
+}
+
+void stringInsert(char * dest, string insert, int index){
+	char destCpy[LINESZ];
+	strcpy(destCpy, dest);
+	int len = insert.size();
 	int i;
 	for(i = index; dest[i] != '\0'; i++){
 		dest[i + len] = destCpy[i];
@@ -112,7 +133,7 @@ void implyFunctionParametersType(char * s){
 	}
 }
 
-void addPahrenthesis(char * s){
+void addPahrenthesis(char * s){	
 	int offset = 0;
 	for(offset = 0; s[offset] == '\n' || s[offset] == '\t' || s[offset] == ' '; offset++)
 		if(s[offset+1] == '/' && s[offset+2] == '/')
@@ -131,7 +152,6 @@ void addPahrenthesis(char * s){
 			implyFunctionParametersType(s);
 		}
 		else{
-			
 			int i;
 			int parenthesisCount = 0;
 			for(i = lookStart; s[i] != '\0'; i++){
@@ -211,8 +231,10 @@ bool structHasTypedef(char * line){
 }
 
 
-void closeKeys(int offset, bool beauty){
+int closeKeys(int offset, bool beauty){
+	int closeAmount = 0;
 	while(offset < offSets.top()){
+		closeAmount++;
 		offSets.pop();				
 		int retOffset = offSets.top();
 		
@@ -263,6 +285,101 @@ void closeKeys(int offset, bool beauty){
 			buffPrevious[buffPreviousLen] = '\0';
 		}
 	}
+	return closeAmount;
+}
+
+bool stringContainsChar(string s, char check){
+	for(char c : s)
+		if(c == check)
+			return true;
+	return false;
+}
+
+void implyVariablesType(char * line){	
+	//Imply variable declaration
+	vector<string> words;
+	string word = "";
+	
+	vector<int> autoInsertPositions;
+	int wordStartIndex = 0;
+	int lastWordStartIndex = 0;
+	
+	int lineSize = strlen(line);
+	bool wordIsArray = false;
+	for(int i = 0; i < lineSize; i++){
+		if(line[i] == '[' || line[i] == ']'){
+			while(!stringContainsChar(" \t\n,;(){}", line[i]))
+				i++;
+			
+			while(stringContainsChar(" \t\n,;(){}", line[i]))
+				i++;
+			
+			word = "";
+		}
+		
+		if(line[i] == '/'){
+			if(line[i+1] == '/'){
+				i += 2;
+				while(line[i-1] != '\n' && line[i] != '\0')
+					i++;
+			}
+			if(line[i+1] == '*'){
+				i += 2;
+				while(line[i] != '\0' || (line[i-2] != '*' && line[i-1] != '/'))
+					i++;
+			}
+		}
+		
+		
+		
+		if(line[i] == '\0')
+			break;
+		
+		if(stringContainsChar(" \t\n,;(){}", line[i])){
+			while(stringContainsChar(" \t\n,;(){}", line[i]))
+				i++;
+			
+			//If only one word exists before equality and it hasn't been seen, imply type
+			if(word == "="){
+				bool wordSeen = false;
+				for(unordered_set<string> wordsLayer : seenWords){
+					if(wordsLayer.count(words.back())){
+						wordSeen = true;
+						break;
+					}
+				}
+				
+				if(!wordSeen){
+					//No need to code type implication again since g++ does it once it sees the variable's type is "auto"
+					//Inserts "auto" before variable name after reading all words
+					
+					int j = lastWordStartIndex-1;
+					while((line[j] == ' ' || line[j] == '\t') && j >= 0)
+						j--;
+					
+					//if last character before current word is a sequence ender, imply variable type
+					if(j == -1 || stringContainsChar("\n,;(){}", line[j]))  
+						autoInsertPositions.push_back(lastWordStartIndex);
+				}
+			}
+			
+			words.push_back(word);
+			lastWordStartIndex = wordStartIndex;
+			wordStartIndex = i;
+			i--;
+			word = "";
+		}
+		else {
+			word += line[i];
+		}
+	}
+	
+	for(int i = autoInsertPositions.size()-1; i >= 0; i--)
+		stringInsert(line, "auto ", autoInsertPositions[i]);
+	
+	//Add new words to seen to avoid duplicate declaration
+	for(string word : words)
+		seenWords.back().insert(word);
 }
 
 void generateSource(char * inputFile, char * outputFile, bool beauty){
@@ -276,6 +393,9 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 	}
 	offSets.push(0);
 	
+	seenWords.clear();
+	seenWords.push_back(unordered_set<string>());
+	
 	multiLineComment = false;
 	
 	inStruct = false;
@@ -284,18 +404,9 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 	strcpy(buffPrevious, "");
 	
 	while (fgets (buff, LINESZ, input)) {
-		int buffLen = strlen(buff);
-		while(buff[buffLen-2] == '\\'){
-			fgets (buff2, LINESZ, input);
-			if(buff[buffLen-2] == '\\'){
-				buff[buffLen-2] = '\n';
-				buff[buffLen-1] = '\0';
-			}
-			strcat(buff, buff2);
-			buffLen += strlen(buff2);
-		}
 		
 		
+		//Skip empty lines
 		bool empty = isEmptyLine(buff);
 		while(empty){
 			if(!fgets (buff2, LINESZ, input))
@@ -309,6 +420,22 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 			buffLen += strlen(buff2);
 		}
 		
+		//Concat \ lines
+		int buffLen = strlen(buff);
+		while(buff[buffLen-2] == '\\'){
+			fgets (buff2, LINESZ, input);
+			if(buff[buffLen-2] == '\\'){
+				buff[buffLen-2] = '\n';
+				buff[buffLen-1] = '\0';
+			}
+			strcat(buff, buff2);
+			buffLen += strlen(buff2);
+		}
+		
+		
+		
+		
+		//Read tab spaces
 		int offset = 0;
 		for(i = 0; i < buffLen; i++){
 			if(buff[i] == '\t')
@@ -331,6 +458,7 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 		bool cPreCompilerTag = false;
 		bool multiLineCommentEnd = false;
 		
+		//Interpret comments & precompiler flags
 		if(buff[i] == '#')
 			cPreCompilerTag = true;
 		else{
@@ -350,6 +478,7 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 			}
 		}
 		
+		int outScopeAmount = 0;
 		if(!multiLineComment && !multiLineCommentEnd && !cPreCompilerTag && !oneLineComment && !emptyLine){
 			if(buff[i-1] != ';' && buff[i-1] != '/' && buff[i-1] != '\\'){
 				if(buff[i] == '\n'){
@@ -366,6 +495,9 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 			}
 			
 			if(offset > offSets.top()){
+				//New scope
+				seenWords.push_back(unordered_set<string>());
+				
 				offSets.push(offset);
 				
 				if(string_isSubstring(buffPrevious, stringStruct) >= 0){
@@ -382,10 +514,12 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 					buffPrevious[buffPreviousLen-1] = '{';
 			} 
 			
-			closeKeys(offset, beauty);			
+			outScopeAmount = closeKeys(offset, beauty);			
 		}
-		
 		addPahrenthesis(buffPrevious);
+		implyVariablesType(buffPrevious);
+		while(outScopeAmount--)
+			seenWords.pop_back();
 		fprintf(output, "%s", buffPrevious);
 		
 		for(i = 0; i < buffLen; i++)
@@ -395,8 +529,11 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 		buffPreviousLen = buffLen;
     }
 	
-	closeKeys(0, beauty);
+	int outScopeAmount = closeKeys(0, beauty);
 	addPahrenthesis(buffPrevious);
+	implyVariablesType(buffPrevious);
+	while(outScopeAmount--)
+		seenWords.pop_back();
 	fprintf(output, "%s", buffPrevious);
 	fclose(input);
 	fclose(output);
