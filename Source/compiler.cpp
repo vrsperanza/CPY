@@ -62,7 +62,7 @@ void stringToLower(char * s){
 }
 
 void printHelp(){
-	printf("USAGE: cmp SourceCode Flags\n");
+	printf("USAGE: cpy SourceCode Flags\n");
 	printf("Flags:\n");
 	printf("\t-h: Shows this help page\n");
 	printf("\t-b: Use line breaks on itermediate code\n");
