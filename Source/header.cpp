@@ -156,7 +156,7 @@ void generateHeader(char * inputFile, char * outputFile){
 		if(keepLine){
 			fprintf(temp, "%s", buff);
 		} else {			
-			if(!includedSelf){
+			if(!includedSelf && !multiLineComment){
 				fprintf(temp, "#include \"%s\"", inputFileHeader);
 				includedSelf = true;
 			}			

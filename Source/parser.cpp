@@ -295,8 +295,7 @@ bool stringContainsChar(string s, char check){
 	return false;
 }
 
-void implyVariablesType(char * line){	
-	//Imply variable declaration
+void implyVariablesType(char * line){
 	vector<string> words;
 	string word = "";
 	
@@ -307,7 +306,7 @@ void implyVariablesType(char * line){
 	int lineSize = strlen(line);
 	bool wordIsArray = false;
 	for(int i = 0; i < lineSize; i++){
-		if(line[i] == '[' || line[i] == ']'){
+		if(stringContainsChar("[])*->.", line[i])){
 			while(!stringContainsChar(" \t\n,;(){}", line[i]))
 				i++;
 			
