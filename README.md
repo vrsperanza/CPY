@@ -3,6 +3,7 @@ To create the executable simply execute make on the source folder
 To compile cpy files use the created executable targeting the main file of the required project:
 	cpy main.cpy -flags
 
+```
 CPY is a (Pre)Compiler of .cpy files, those are basically C++ withought redundancy.
 	Curly brackets are implied from identation;
 	Semicolons are implied from line breaks (lines must be marked to continue, not to break)
@@ -12,8 +13,8 @@ CPY is a (Pre)Compiler of .cpy files, those are basically C++ withought redundan
 	Sequenced style declarations have also been generalised to functions:
 		"int a, b" works inside function declarations
 Simply execute the compiler followed by your source folder and it will create the executable
-
-In any of the given examples, "cpy main.cpy" will create a working executable
+```
+In any of the given examples, "cpy mainFile.cpy" will create a working executable
 
 Features:
 
