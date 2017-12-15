@@ -165,7 +165,7 @@ int main(int argc, char ** argv){
 		
 		if(strcmp("-o", argument) == 0){
 			if(i + 1 >= argc){
-				printf("ERROR: Output flag requires filename\nEg: %s main.c -o execName", argv[0]);
+				printf("ERROR: Output flag requires filename\nEg: %s main.c -o execName\n", argv[0]);
 				exit(0);
 			}
 			strcpy(target, argv[i + 1]);
@@ -238,7 +238,7 @@ int main(int argc, char ** argv){
 				placeAutoTag(cppFile);
 			}
 			else
-				printf("Required file: %s not found", sourceFile);
+				printf("Required file: %s not found\n", sourceFile);
 		
 		dependence = getDependencies(cppFile);
 		
