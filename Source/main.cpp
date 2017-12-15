@@ -139,7 +139,6 @@ int main(int argc, char ** argv){
 	
 	while(!dependenciesToProcess.empty()){
 		string fileName = dependenciesToProcess.top();
-		cout << "Process: " << fileName << endl;
 		dependenciesToProcess.pop();
 		
 		filesDone.insert(fileName);
