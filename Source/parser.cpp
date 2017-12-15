@@ -158,12 +158,10 @@ void addPahrenthesis(char * s){
 			
 			bool imply = true;
 			int parenthesisCount = 0;
-			cout << "String: " << s << endl;
 			
 			while(s[i] != '(' && s[i] != '\0') i++;
 			
 			for(; s[i] != '\0'; i++){
-				cout << s[i] << " ";
 				if(s[i] == '(')
 					parenthesisCount++;
 				else if(s[i] == ')')
