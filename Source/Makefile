@@ -1,2 +1,2 @@
-all: compiler.cpp header.cpp parser.cpp
-	g++ compiler.cpp header.cpp parser.cpp -o cpy
+all: dependenciesMapper.cpp extensionHandler.cpp file.cpp headerGen.cpp line.cpp main.cpp rawIncludes.cpp sourceGen.cpp string.cpp
+	g++ dependenciesMapper.cpp extensionHandler.cpp file.cpp headerGen.cpp line.cpp main.cpp rawIncludes.cpp sourceGen.cpp string.cpp -o cpy
