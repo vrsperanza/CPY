@@ -157,10 +157,11 @@ void addPahrenthesis(char * s){
 				i++;
 			
 			bool imply = true;
+			
+			while(!stringContainsChar(" \t\n(", s[i]) && s[i] != '\0') i++;
+			while(stringContainsChar(" \t\n", s[i])) i++;
+			
 			int parenthesisCount = 0;
-			
-			while(s[i] != '(' && s[i] != '\0') i++;
-			
 			for(; s[i] != '\0'; i++){
 				if(s[i] == '(')
 					parenthesisCount++;
@@ -168,7 +169,8 @@ void addPahrenthesis(char * s){
 					parenthesisCount--;
 				
 				if(parenthesisCount == 0){
-					i++;
+					if(s[i] == ')')
+						i++;
 					while(stringContainsChar(" \t\n{;", s[i]))
 						i++;
 					imply = !(s[i] == '\0');
