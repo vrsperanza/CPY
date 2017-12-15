@@ -311,9 +311,6 @@ void implyVariablesType(char * line){
 			while(!stringContainsChar(" \t\n,;(){}", line[i]))
 				i++;
 			
-			while(stringContainsChar(" \t\n,;(){}", line[i]))
-				i++;
-			
 			word = "";
 		}
 		
