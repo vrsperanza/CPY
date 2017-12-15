@@ -15,10 +15,18 @@
 using namespace std;
 char path[LINESZ] = "";
 
-bool fileExist (char * filename){
-	if(access( filename, F_OK ) != -1)
+bool fileExist (char * fileName){
+	if(access( fileName, F_OK ) != -1)
 		return true;
 	return false;
+}
+
+string removeCharExt(char * fileName){
+	string s = "";
+	for(int i = 0; fileName[i] != '.' && fileName[i] != '\0'; i++){
+		s += fileName[i];
+	}
+	return s;
 }
 
 void stringToCPY(string input, char * fileName){
@@ -150,13 +158,8 @@ int main(int argc, char ** argv){
 	}
 	
 	char argument[LINESZ];
-	strcpy(argument, argv[1]);
-	stringToLower(argument);
-	if(strcmp("-h", argument) == 0 || strcmp("-help", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
-		printHelp();
-	}
-		
-	for(i = 2; i < argc; i++){
+	string stringSource = "";
+	for(i = 1; i < argc; i++){
 		strcpy(argument, argv[i]);
 		stringToLower(argument);
 		
@@ -189,12 +192,14 @@ int main(int argc, char ** argv){
 		}else if(strcmp("-h", argument) == 0 || strcmp("-help", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
 			printHelp();
 		}  else {
-			strcat(compilation, argv[i]);
-			strcat(compilation, " ");
+			if(stringSource == "")
+				stringSource = removeCharExt(argv[i]);
+			else
+				printf("ERROR: Only one source file must be specified, ignoring %s\n", argv[i]);
 		}
 	}
 	
-	strcpy(source, argv[1]);
+	stringToCPP(stringSource, source);
 	
 	stack<string> dependenciesToProcess;
 	set<string> filesDone;
