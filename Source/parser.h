@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 #include <stack>
 using namespace std;
 
@@ -16,5 +17,6 @@ int string_isSubstring(char* mainStr, char* subStr);
 void getStructName(char * line, char * buffer);
 bool structHasTypedef(char * line);
 void strInsert(char * dest, char * insert, int index);
+bool stringContainsChar(string s, char check);
 
 #endif

@@ -135,7 +135,7 @@ void implyFunctionParametersType(char * s){
 
 void addPahrenthesis(char * s){	
 	int offset = 0;
-	for(offset = 0; s[offset] == '\n' || s[offset] == '\t' || s[offset] == ' '; offset++)
+	for(offset = 0; stringContainsChar(" \n\t", s[offset]); offset++)
 		if(s[offset+1] == '/' && s[offset+2] == '/')
 			while(s[offset] != '\n')
 				offset++;
@@ -147,32 +147,33 @@ void addPahrenthesis(char * s){
 	
 	if(s[len-2] == '{'){
 		int lookStart = max(max(max(string_isSubstring(s, stringif), string_isSubstring(s, stringfor)), string_isSubstring(s, stringwhile)), string_isSubstring(s, stringswitch));
-							
+		
 		if(lookStart == -1){
 			implyFunctionParametersType(s);
 		}
 		else{
-			int i;
+			int i = lookStart;
+			while(stringContainsChar(" \t\n", s[i]))
+				i++;
+			
+			bool imply = true;
 			int parenthesisCount = 0;
-			for(i = lookStart; s[i] != '\0'; i++){
-				if(s[i] == '('){
-					break;
-				}
-			}
+			cout << "String: " << s << endl;
+			
+			while(s[i] != '(' && s[i] != '\0') i++;
+			
 			for(; s[i] != '\0'; i++){
+				cout << s[i] << " ";
 				if(s[i] == '(')
 					parenthesisCount++;
 				else if(s[i] == ')')
 					parenthesisCount--;
 				
-				if(parenthesisCount == 0)
-					break;
-			}
-			
-			bool imply = (s[i] == '\0');
-			for(; s[i] != '\0'; i++){
-				if(s[i] != ' ' && s[i] != '\t' && s[i] != '\n' && s[i] != '{'){
-					imply = true;
+				if(parenthesisCount == 0){
+					i++;
+					while(stringContainsChar(" \t\n{;", s[i]))
+						i++;
+					imply = !(s[i] == '\0');
 					break;
 				}
 			}
