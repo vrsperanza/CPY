@@ -7,69 +7,19 @@
 #include <set>
 #include <map>
 #include <stack>
+#include <iostream>
 
-#include "parser.h"
-#include "header.h"
-#include "compiler.h"
+#include "globalHeader.h"
+#include "sourceGen.h"
+#include "headerGen.h"
+#include "string.h"
+#include "file.h"
+#include "line.h"
+#include "extensionHandler.h"
+#include "dependenciesMapper.h"
+#include "rawIncludes.h"
 
 using namespace std;
-char path[LINESZ] = "";
-
-bool fileExist (char * fileName){
-	if(access( fileName, F_OK ) != -1)
-		return true;
-	return false;
-}
-
-string removeCharExt(char * fileName){
-	string s = "";
-	for(int i = 0; fileName[i] != '.' && fileName[i] != '\0'; i++){
-		s += fileName[i];
-	}
-	return s;
-}
-
-void stringToCPY(string input, char * fileName){
-	int i;
-	strcpy(fileName, path);
-	int j = strlen(fileName);
-	for(i = 0; i < input.size(); i++)
-		fileName[j++] = input[i];
-	fileName[j++] = '.';
-	fileName[j++] = 'c';
-	fileName[j++] = 'p';
-	fileName[j++] = 'y';
-	fileName[j++] = '\0';
-}
-
-void stringToCPP(string input, char * fileName){
-	int i;
-	strcpy(fileName, path);
-	int j = strlen(fileName);
-	for(i = 0; i < input.size(); i++)
-		fileName[j++] = input[i];
-	fileName[j++] = '.';
-	fileName[j++] = 'c';
-	fileName[j++] = 'p';
-	fileName[j++] = 'p';
-	fileName[j++] = '\0';
-}
-
-void stringToH(string input, char * fileName){
-	int i;
-	strcpy(fileName, path);
-	int j = strlen(fileName);
-	for(i = 0; i < input.size(); i++)
-		fileName[j++] = input[i];
-	fileName[j++] = '.';
-	fileName[j++] = 'h';
-	fileName[j++] = '\0';
-}
-
-void stringToLower(char * s){
-	for(int i = 0; s[i]; i++)
-		s[i] = tolower(s[i]);
-}
 
 void printHelp(){
 	printf("USAGE: cpy SourceCode Flags\n");
@@ -83,27 +33,6 @@ void printHelp(){
 	printf("\t-o target: Specifies target executable name, when not specified target = a\n");
 	printf("\t-OtherFlags: Redirects flag to underlying compiler\n");
 	exit(0);
-}
-
-bool isOverwritable(char * fileName){
-	FILE * f = fopen(fileName, "r");
-	if(f == NULL)
-		return true;
-	
-	char buff[LINESZ];
-	fgets (buff, LINESZ, f);
-	
-	fclose(f);
-	
-	int len = strlen(buff);
-	
-	char autoTag[] = "AutoTag";
-	
-	int i, j;
-	for(i = len - 8, j = 0; buff[i] != '\n' && buff[i] != '\0'; i++, j++)
-		if(buff[i] != autoTag[j])
-			return false;
-	return true;
 }
 
 void placeAutoTag(char * fileName){		
@@ -173,9 +102,6 @@ int main(int argc, char ** argv){
 			strcat(compilation, argv[i + 1]);
 			strcat(compilation, " ");
 			i++;
-		} else if(strcmp("-p", argument) == 0 || strcmp("-path", argument) == 0){
-			strcpy(path, argv[++i]);
-			strcat(path, "\\");
 		} else if(strcmp("-b", argument) == 0 || strcmp("-beauty", argument) == 0 || strcmp("-toruncodes", argument) == 0){
 			beauty = true;
 			clear = false;
@@ -205,10 +131,7 @@ int main(int argc, char ** argv){
 	set<string> filesDone;
 	map<string, vector<string> > dependencies;
 	
-	string firstFile = "";
-	for(int i = 0; source[i] != '.' && source[i] != '\0'; i++)
-		firstFile += source[i];
-	dependenciesToProcess.push(firstFile);
+	dependenciesToProcess.push(stringSource);
 	
 	char sourceFile[100];
 	char cppFile[100];
@@ -216,6 +139,7 @@ int main(int argc, char ** argv){
 	
 	while(!dependenciesToProcess.empty()){
 		string fileName = dependenciesToProcess.top();
+		cout << "Process: " << fileName << endl;
 		dependenciesToProcess.pop();
 		
 		filesDone.insert(fileName);
