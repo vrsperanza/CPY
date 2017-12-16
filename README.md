@@ -79,7 +79,7 @@ Can imply parenthesis on if, switch, for and while:
 New precompilation tag: #raw "file"
 Includes file's content directly in code before calling g++, usefull if you can only send one file instead of a big project - intended for competitive coding.
 
-Can be compiled alongside normal cpp files and has some safety features to block deletion of other source files
+Can be compiled alongside normal cpp files; Has some safety features to block deletion of other source files
 Currently it is possible to have some .cpy files and some .cpp, it will create .cpp and .h files from .cpy only if they are not present or procedurally generated (if you choose to keep them with -k), linking doesn't edit files, so it is (untested) possible to compile a complete cpp project running "cpy main.cpp"
 
 ```
@@ -87,10 +87,8 @@ USAGE: cpy SourceCode Flags
 Flags:
         -h: Shows this help page
         -b: Use line breaks on itermediate code
-        -k: Keeps intermediate code
         -r: Automatically runs compiled code
         -nc: Doesn't compile resulting code
-        -nh: Doesn't create headers
         -o target: Specifies target executable name, when not specified target = a
         -OtherFlags: Redirects flag to underlying compiler (g++)
 ```
