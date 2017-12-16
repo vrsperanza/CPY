@@ -3,5 +3,7 @@
 
 bool fileExist (char * fileName);
 bool isOverwritable(char * fileName);
+void copyFile(const char * source, const char * dest);
+bool directoryExists(const char *path);
 
 #endif

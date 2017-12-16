@@ -18,6 +18,7 @@
 #include "extensionHandler.h"
 #include "dependenciesMapper.h"
 #include "rawIncludes.h"
+#include "folderHandler.h"
 
 using namespace std;
 
@@ -26,7 +27,6 @@ void printHelp(){
 	printf("Flags:\n");
 	printf("\t-h: Shows this help page\n");
 	printf("\t-b: Use line breaks on itermediate code\n");
-	printf("\t-k: Keeps intermediate code\n");
 	printf("\t-r: Automatically runs compiled code\n");
 	printf("\t-nc: Doesn't compile resulting code\n");
 	printf("\t-nh: Doesn't create headers\n");
@@ -66,8 +66,7 @@ void placeAutoTag(char * fileName){
 	return;
 }
 
-int main(int argc, char ** argv){	
-
+int main(int argc, char ** argv){
 	bool beauty = false;
 	bool clear = true;
 	bool run = false;
@@ -76,7 +75,6 @@ int main(int argc, char ** argv){
 	
 	int i, j;
 	
-	char source[LINESZ];
 	char target[LINESZ] = "a";
 	
 	char compilation[LINESZ] = "g++ ";
@@ -105,8 +103,6 @@ int main(int argc, char ** argv){
 		} else if(strcmp("-b", argument) == 0 || strcmp("-beauty", argument) == 0 || strcmp("-toruncodes", argument) == 0){
 			beauty = true;
 			clear = false;
-		} else if(strcmp("-k", argument) == 0 || strcmp("-keep", argument) == 0){
-			clear = false;
 		} else if(strcmp("-r", argument) == 0 || strcmp("-run", argument) == 0){
 			run = true;
 			compile = true;
@@ -115,17 +111,24 @@ int main(int argc, char ** argv){
 			run = false;
 		} else if(strcmp("-nh", argument) == 0 || strcmp("-noheader", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
 			generateHeaders = false;
-		}else if(strcmp("-h", argument) == 0 || strcmp("-help", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
+		} else if(strcmp("-h", argument) == 0 || strcmp("-help", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
 			printHelp();
 		}  else {
 			if(stringSource == "")
-				stringSource = removeCharExt(argv[i]);
+				if(argv[i][0] != '-')
+					stringSource = removeCharExt(argv[i]);
+				else{
+					strcat(compilation, argv[i]);
+					strcat(compilation, " ");
+				}
 			else
 				printf("ERROR: Only one source file must be specified, ignoring %s\n", argv[i]);
 		}
 	}
 	
-	stringToCPP(stringSource, source);
+	prepareFolder();
+	chdir(compilataionDirectory);
+	stringSource = cropPath(stringSource);
 	
 	stack<string> dependenciesToProcess;
 	set<string> filesDone;
@@ -191,24 +194,14 @@ int main(int argc, char ** argv){
 
 	if(compile){
 		system(compilation);
-	}
-	
-	if(clear){
-		for(string fileName : filesDone){
-			char cppFile[100];
-			char headerFile[100];
-			stringToCPP(fileName, cppFile);
-			stringToH(fileName, headerFile);
-			
-			if(fileExist(cppFile) && isOverwritable(cppFile))
-				remove(cppFile);
-			if(fileExist(headerFile) && isOverwritable(headerFile))
-				remove(headerFile);
+		string compiledFile = removeCharExt(target);
+		compiledFile += ".exe";
+		string parentTarget = "../" + compiledFile;
+		rename(compiledFile.c_str(), parentTarget.c_str());
+		
+		if(run){
+			printf("Running code:\n");
+			system(parentTarget.c_str());
 		}
-	}
-	
-	if(run){
-		printf("Running code:\n");
-		system(target);
 	}
 }
