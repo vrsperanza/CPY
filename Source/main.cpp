@@ -127,7 +127,7 @@ int main(int argc, char ** argv){
 	}
 	
 	prepareFolder();
-	chdir(compilataionDirectory);
+	chdir(compilationDirectory);
 	stringSource = cropPath(stringSource);
 	
 	stack<string> dependenciesToProcess;
@@ -136,7 +136,7 @@ int main(int argc, char ** argv){
 	
 	dependenciesToProcess.push(stringSource);
 	
-	char sourceFile[100];
+	char cpyFile[100];
 	char cppFile[100];
 	char headerFile[100];
 	
@@ -146,7 +146,7 @@ int main(int argc, char ** argv){
 		
 		filesDone.insert(fileName);
 			
-		stringToCPY(fileName, sourceFile);
+		stringToCPY(fileName, cpyFile);
 		stringToCPP(fileName, cppFile);
 		stringToH(fileName, headerFile);
 		
@@ -157,14 +157,15 @@ int main(int argc, char ** argv){
 		
 		bool wroteCppFile = false;
 		if(isOverwritable(cppFile))
-			if(fileExist(sourceFile)){
-				generateSource(sourceFile, cppFile, beauty);
+			if(fileExist(cpyFile)){
+				replaceRawIncludes(cpyFile);
+				generateSource(cpyFile, cppFile, beauty);
 				if(isOverwritable(headerFile) && generateHeaders)
 					generateHeader(cppFile, headerFile);
 				placeAutoTag(cppFile);
 			}
 			else
-				printf("Required file: %s not found\n", sourceFile);
+				printf("Required file: %s not found\n", cpyFile);
 		
 		dependence = getDependencies(cppFile);
 		
@@ -180,16 +181,6 @@ int main(int argc, char ** argv){
 				dependenciesToProcess.push(fileName);
 			}
 		}
-	}
-	
-	for(string fileName : filesDone){
-		char cppFile[100];
-		char headerFile[100];
-		stringToCPP(fileName, cppFile);
-		stringToH(fileName, headerFile);
-		
-		replaceRawIncludes(cppFile);
-		replaceRawIncludes(headerFile);
 	}
 
 	if(compile){

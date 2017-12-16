@@ -111,7 +111,7 @@ string rawInclude(char * line){
 	while(line[i] == ' ' || line[i] == '\t') i++;
 	if(line[i] == '\"'){
 		i++;
-		while(line[i] != '\"' && line[i] != '\0' && line[i] != '.') includeName += line[i++];
+		while(line[i] != '\"' && line[i] != '\0') includeName += line[i++];
 		return includeName;
 	}
 	return includeName;

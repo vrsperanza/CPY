@@ -10,13 +10,13 @@ using namespace std;
 #include <sys/stat.h>
 #include <stdlib.h>
 
-bool fileExist (char * fileName){
+bool fileExist (const char * fileName){
 	if(access( fileName, F_OK ) != -1)
 		return true;
 	return false;
 }
 
-bool isOverwritable(char * fileName){
+bool isOverwritable(const char * fileName){
 	FILE * f = fopen(fileName, "r");
 	if(f == NULL)
 		return true;
@@ -46,6 +46,9 @@ void copyFile(const char * source, const char * dest){
 
     while ((size = read(src, buf, BUFSIZ)) > 0)
         write(dst, buf, size);
+	
+	close(src);
+	close(dst);
 }
 
 bool directoryExists(const char *path){

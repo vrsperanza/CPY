@@ -1,7 +1,7 @@
 #ifndef _RAWINCLUDES_H_43674_
 #define _RAWINCLUDES_H_43674_
 
-bool replaceRawIncludesInner(char * filename);
-void replaceRawIncludes(char * filename);
+bool replaceRawIncludesInner(const char * filename);
+void replaceRawIncludes(const char * filename);
 
 #endif

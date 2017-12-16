@@ -11,18 +11,25 @@
 #include "sourceGen.h"
 using namespace std;
 
-bool replaceRawIncludesInner(char * filename){	
+#include <iostream>
+
+bool replaceRawIncludesInner(const char * filename){	
 	bool replacedSomething = false;
 	FILE * input = fopen(filename, "r");
 	if(input == NULL)
 		return replacedSomething;
 	
-	FILE * output = fopen("temp.autocpp", "w+");
+	FILE * output = fopen(tempFile, "w+");
 	char line[LINESZ];
 	char line2[LINESZ];
 	while (fgets (line, LINESZ, input)) {
 		string includeName = rawInclude(line);
 		if(includeName != ""){
+			replacedSomething = true;
+			
+			//Keep whatever is after #raw "file.ext"
+			//Eg:
+			//#raw "template.cpy" //AutoTag
 			int aspCnt = 0;
 			int i = 0;
 			while(aspCnt < 2 && line[i] != '\0'){
@@ -30,49 +37,22 @@ bool replaceRawIncludesInner(char * filename){
 					aspCnt++;
 				i++;
 			}
-			
 			while(line[i] != '\0'){
 				fprintf(output, "%c", line[i]);
 				i++;
 			}
 			
-			replacedSomething = true;
-			char includeCpy[100];
-			char includeCpp[100];
-			char includeH[100];
-			stringToCPY(includeName, includeCpy);
-			stringToCPP(includeName, includeCpp);
-			stringToH(includeName, includeH);
-			
-			if(fileExist(includeH)){
-				FILE * copy = fopen(includeH, "r");
+			//Copies include content to current file
+			if(fileExist(includeName.c_str())){
+				FILE * copy = fopen(includeName.c_str(), "r");
 				while (fgets (line2, LINESZ, copy)){
 					fprintf(output, "%s", line2);
 				}
 				fprintf(output, "\n");
 				fclose(copy);
-			}
-			
-			bool newGen = false;
-			if(!fileExist(includeCpp) && fileExist(includeCpy)){
-				generateSource(includeCpy, includeCpp, true);
-				newGen = true;
-			}
-			
-			if(fileExist(includeCpp)){
-				FILE * copy = fopen(includeCpp, "r");
-				while (fgets (line2, LINESZ, copy)){
-					fprintf(output, "%s", line2);
-				}
-				fprintf(output, "\n");
-				fclose(copy);
-				
-				if(newGen){
-					remove(includeCpp);
-				}
 			}
 			else {
-				printf("Raw include file not found: %s", line);
+				printf("Raw include file not found: %s", includeName);
 			}
 		}
 		else
@@ -81,11 +61,11 @@ bool replaceRawIncludesInner(char * filename){
 	fclose(input);
 	fclose(output);
 	remove(filename);
-	rename("temp.autocpp", filename);
+	rename(tempFile, filename);
 	return replacedSomething;
 }
 
-void replaceRawIncludes(char * filename){
+void replaceRawIncludes(const char * filename){
 	int timeout = 1000;
 	while(replaceRawIncludesInner(filename) && timeout--);
 	if(timeout <= 0)

@@ -4,7 +4,9 @@
 #define LINESZ 16384
 #define tabSpaces 4
 
-#define compilataionDirectory "CompilationSourceResult"
+#define compilationDirectory "CompilationSourceResult"
+
+#define tempFile "autofile.temp"
 
 #include <string>
 #include <vector>
