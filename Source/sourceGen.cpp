@@ -153,7 +153,7 @@ int closeKeys(int offset, bool beauty){
 				buffPrevious[buffPreviousLen++] = '}';
 				buffPrevious[buffPreviousLen++] = '\n';
 				buffPrevious[buffPreviousLen] = '\0';
-			} else {
+			} else {				
 				buffPrevious[buffPreviousLen++] = '}';
 				buffPrevious[buffPreviousLen] = '\0';
 			}
@@ -169,7 +169,7 @@ int closeKeys(int offset, bool beauty){
 					buffPrevious[buffPreviousLen++] = structName[i++];
 				buffPreviousLen++;
 			}
-			buffPrevious[buffPreviousLen - 1] = ';';
+			buffPrevious[buffPreviousLen-1] = ';';
 			buffPrevious[buffPreviousLen++] = '\n';
 			buffPrevious[buffPreviousLen] = '\0';
 		}
@@ -247,8 +247,6 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 			else
 				break;
 		}
-		
-		bool emptyLine = (buff[i] == '\n');
 		bool oneLineComment = false;
 		bool cPreCompilerTag = false;
 		bool multiLineCommentEnd = false;
@@ -274,7 +272,7 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 		}
 		
 		int outScopeAmount = 0;
-		if(!multiLineComment && !multiLineCommentEnd && !cPreCompilerTag && !oneLineComment && !emptyLine){
+		if(!multiLineComment && !multiLineCommentEnd && !cPreCompilerTag && !oneLineComment){
 			if(buff[i-1] != ';' && buff[i-1] != '/' && buff[i-1] != '\\'){
 				if(buff[i] == '\n'){
 					buff[i] = ';';
@@ -317,11 +315,10 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 			seenWords.pop_back();
 		fprintf(output, "%s", buffPrevious);
 		
-		for(i = 0; i < buffLen; i++)
+		for(i = 0; buff[i] != '\0'; i++)
 			buffPrevious[i] = buff[i];
-		for(; i < LINESZ; i++)
-			buffPrevious[i] = 0;
-		buffPreviousLen = buffLen;
+		buffPrevious[i] = '\0';
+		buffPreviousLen = i;
     }
 	
 	int outScopeAmount = closeKeys(0, beauty);
