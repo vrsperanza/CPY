@@ -29,7 +29,6 @@ void printHelp(){
 	printf("\t-b: Use line breaks on itermediate code\n");
 	printf("\t-r: Automatically runs compiled code\n");
 	printf("\t-nc: Doesn't compile resulting code\n");
-	printf("\t-nh: Doesn't create headers\n");
 	printf("\t-o target: Specifies target executable name, when not specified target = a\n");
 	printf("\t-OtherFlags: Redirects flag to underlying compiler\n");
 	exit(0);
@@ -68,10 +67,8 @@ void placeAutoTag(char * fileName){
 
 int main(int argc, char ** argv){
 	bool beauty = false;
-	bool clear = true;
 	bool run = false;
 	bool compile = true;
-	bool generateHeaders = true;
 	
 	int i, j;
 	
@@ -102,15 +99,12 @@ int main(int argc, char ** argv){
 			i++;
 		} else if(strcmp("-b", argument) == 0 || strcmp("-beauty", argument) == 0 || strcmp("-toruncodes", argument) == 0){
 			beauty = true;
-			clear = false;
 		} else if(strcmp("-r", argument) == 0 || strcmp("-run", argument) == 0){
 			run = true;
 			compile = true;
 		} else if(strcmp("-nc", argument) == 0|| strcmp("-nocompile", argument) == 0){
 			compile = false;
 			run = false;
-		} else if(strcmp("-nh", argument) == 0 || strcmp("-noheader", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
-			generateHeaders = false;
 		} else if(strcmp("-h", argument) == 0 || strcmp("-help", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
 			printHelp();
 		}  else {
@@ -132,6 +126,7 @@ int main(int argc, char ** argv){
 	
 	stack<string> dependenciesToProcess;
 	set<string> filesDone;
+	set<string> requiredHeaders;
 	map<string, vector<string> > dependencies;
 	
 	dependenciesToProcess.push(stringSource);
@@ -148,34 +143,34 @@ int main(int argc, char ** argv){
 			
 		stringToCPY(fileName, cpyFile);
 		stringToCPP(fileName, cppFile);
-		stringToH(fileName, headerFile);
 		
-		vector<string> dependence;
+		vector<string> dependences;
 		
 		strcat(compilation, cppFile);
 		strcat(compilation, " ");
 		
 		bool wroteCppFile = false;
-		if(isOverwritable(cppFile))
+		if(isOverwritable(cppFile)){
 			if(fileExist(cpyFile)){
 				replaceRawIncludes(cpyFile);
 				generateSource(cpyFile, cppFile, beauty);
-				if(isOverwritable(headerFile) && generateHeaders)
-					generateHeader(cppFile, headerFile);
 				placeAutoTag(cppFile);
 			}
 			else
 				printf("Required file: %s not found\n", cpyFile);
+		}
 		
-		dependence = getDependencies(cppFile);
+		dependences = getDependencies(cppFile);
 		
 		pair<string, vector<string> > dep;
 		dep.first = fileName;
-		dep.second = dependence;
+		dep.second = dependences;
 		
 		dependencies.insert(dep);
 		
-		for(string fileName : dependence){
+		for(string fileName : dependences){
+			requiredHeaders.insert(fileName);
+			
 			if(!filesDone.count(fileName)){
 				filesDone.insert(fileName);
 				dependenciesToProcess.push(fileName);
@@ -183,6 +178,12 @@ int main(int argc, char ** argv){
 		}
 	}
 
+	for(string fileName : requiredHeaders){
+		stringToH(fileName, headerFile);
+		if(isOverwritable(headerFile))
+			generateHeader(cppFile, headerFile);
+	}
+	
 	if(compile){
 		system(compilation);
 		string compiledFile = removeCharExt(target);

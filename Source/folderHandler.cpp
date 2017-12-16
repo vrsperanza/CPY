@@ -10,7 +10,11 @@
 using namespace std;
 
 void CloneFilesToCompilationDirectory(const std::string& path){
-	if(path == compilationDirectory)
+	string compDir = "./";
+	compDir += compilationDirectory;
+	compDir += "/";
+	
+	if(path == compDir)
 		return;
 	
     DIR *dpdf;
@@ -25,6 +29,8 @@ void CloneFilesToCompilationDirectory(const std::string& path){
 				string src = path+epdf->d_name;
 				string temp = compilationDirectory;
 				string dest = temp+"//"+epdf->d_name;
+				if(fileExist(dest.c_str()))
+					remove(dest.c_str());
 				copyFile(src.c_str(), dest.c_str());
             }
         }
