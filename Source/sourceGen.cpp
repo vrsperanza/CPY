@@ -212,7 +212,7 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 			}
 			empty = isEmptyLine(buff2);
 			strcat(buff, buff2);
-			buffLen += strlen(buff2);
+			buffLen = strlen(buff);
 		}
 		
 		//Concat \ lines
@@ -224,7 +224,7 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 				buff[buffLen-1] = '\0';
 			}
 			strcat(buff, buff2);
-			buffLen += strlen(buff2);
+			buffLen = strlen(buff);
 		}
 		
 		
@@ -278,17 +278,15 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 					buff[i] = ';';
 					buff[i+1] = '\n';
 					buff[i+2] = '\0';
-					buffLen++;
 				}
 				else {
 					buff[i+1] = ';';
 					buff[i+2] = '\0';
-					buffLen++;
 				}
+				buffLen = strlen(buff);
 			}
 			
 			if(offset > offSets.top()){
-				//New scope
 				seenWords.push_back(unordered_set<string>());
 				
 				offSets.push(offset);
