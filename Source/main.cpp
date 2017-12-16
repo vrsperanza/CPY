@@ -34,6 +34,61 @@ void printHelp(){
 	exit(0);
 }
 
+void smartCompilation(map<string, vector<string> > dependenceMap, string mainFile, string target, string compilation){
+	set<string> generatedObjects;
+	stack<string> toProcess;
+	generatedObjects.insert(mainFile);
+	toProcess.push(mainFile);
+	string systemCall;
+	
+	bool someObjectUpdated = false;
+	
+	//Create / Update / Check Object files
+	while(!toProcess.empty()){
+		string fileName = toProcess.top();
+		toProcess.pop();
+		
+		
+		string cppSource = fileName + ".cpp";
+		string targetObject = fileName + ".o";
+		
+		if(fileModifiedTime(targetObject.c_str()) < fileModifiedTime(cppSource.c_str())){
+			systemCall = "g++ -c " + cppSource + " -o " + targetObject;
+			cout << systemCall << endl;
+			system(systemCall.c_str());
+			
+			//One object file was updated, linking has to happen again
+			someObjectUpdated = true;
+		}
+		
+		if(dependenceMap.count(fileName)){
+			for(string dependence : dependenceMap[fileName]){
+				if(!generatedObjects.count(dependence)){
+					generatedObjects.insert(dependence);
+					toProcess.push(dependence);
+				}
+			}
+		}
+		else
+			printf("File not found: %s\n", fileName.c_str());
+	}
+	
+	//Link all objects into the desired executable
+	string trueTarget = "../" + target;
+	if(someObjectUpdated || !fileExist((trueTarget + ".exe").c_str())){
+		compilation += "-o " + trueTarget + " ";
+		for(string object : generatedObjects){
+			compilation += object + ".o ";
+		}
+		cout << compilation << endl;
+		system(compilation.c_str());
+		remove(trueTarget.c_str());
+		rename(target.c_str(), trueTarget.c_str());
+	} else {
+		cout << target << " is up to date\n";
+	}
+}
+
 int main(int argc, char ** argv){
 	bool beauty = false;
 	bool run = false;
@@ -45,6 +100,7 @@ int main(int argc, char ** argv){
 	
 	char compilation[LINESZ] = "g++ ";
 	
+	//Process Arguments
 	if(argc < 2){
 		printf("USAGE: %s SourceCode Flags\n", argv[0]);
 		exit(0);
@@ -62,9 +118,6 @@ int main(int argc, char ** argv){
 				exit(0);
 			}
 			strcpy(target, argv[i + 1]);
-			strcat(compilation, "-o ");
-			strcat(compilation, argv[i + 1]);
-			strcat(compilation, " ");
 			i++;
 		} else if(strcmp("-b", argument) == 0 || strcmp("-beauty", argument) == 0 || strcmp("-toruncodes", argument) == 0){
 			beauty = true;
@@ -76,28 +129,30 @@ int main(int argc, char ** argv){
 			run = false;
 		} else if(strcmp("-h", argument) == 0 || strcmp("-help", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
 			printHelp();
-		}  else {
-			if(stringSource == "")
-				if(argv[i][0] != '-')
+		} else {
+			if(argv[i][0] != '-'){
+				if(stringSource == "")
 					stringSource = removeCharExt(argv[i]);
-				else{
-					strcat(compilation, argv[i]);
-					strcat(compilation, " ");
-				}
-			else
-				printf("ERROR: Only one source file must be specified, ignoring %s\n", argv[i]);
+				else
+					printf("ERROR: Only one source file must be specified, ignoring %s\n", argv[i]);
+			} else {
+				strcat(compilation, argv[i]);
+				strcat(compilation, " ");
+			}
 		}
 	}
 	
+	//Prepare compilation folder and move to it
 	prepareFolder();
 	chdir(compilationDirectory);
 	stringSource = cropPath(stringSource);
 	
+	//Generate complete c++ source
 	stack<string> dependenciesToProcess;
 	set<string> filesDone;
 	set<string> requiredHeaders;
 	set<string> allowedHeaders;
-	map<string, vector<string> > dependencies;
+	map<string, vector<string> > dependenceMap;
 	
 	dependenciesToProcess.push(stringSource);
 	
@@ -105,6 +160,7 @@ int main(int argc, char ** argv){
 	char cppFile[100];
 	char headerFile[100];
 	
+	//Generate complete c++ source
 	while(!dependenciesToProcess.empty()){
 		string fileName = dependenciesToProcess.top();
 		dependenciesToProcess.pop();
@@ -114,10 +170,7 @@ int main(int argc, char ** argv){
 		stringToCPY(fileName, cpyFile);
 		stringToCPP(fileName, cppFile);
 		
-		vector<string> dependences;
-		
-		strcat(compilation, cppFile);
-		strcat(compilation, " ");
+		vector<string> dependencies;
 		
 		bool wroteCppFile = false;
 		if(!fileExist(cppFile)){
@@ -138,15 +191,15 @@ int main(int argc, char ** argv){
 			}
 		}
 		
-		dependences = getDependencies(cppFile);
+		dependencies = getDependencies(cppFile);
 		
 		pair<string, vector<string> > dep;
 		dep.first = fileName;
-		dep.second = dependences;
+		dep.second = dependencies;
 		
-		dependencies.insert(dep);
+		dependenceMap.insert(dep);
 		
-		for(string fileName : dependences){
+		for(string fileName : dependencies){
 			requiredHeaders.insert(fileName);
 			
 			if(!filesDone.count(fileName)){
@@ -156,6 +209,7 @@ int main(int argc, char ** argv){
 		}
 	}
 
+	//Generate necessary headers
 	for(string fileName : requiredHeaders){
 		if(allowedHeaders.count(fileName)){
 			stringToH(fileName, headerFile);
@@ -165,17 +219,14 @@ int main(int argc, char ** argv){
 		}
 	}
 	
-	if(compile){
-		system(compilation);
-		string compiledFile = removeCharExt(target);
-		compiledFile += ".exe";
-		string parentTarget = "../" + compiledFile;
-		remove(parentTarget.c_str());
-		rename(compiledFile.c_str(), parentTarget.c_str());
+	//Compile files
+	if(compile){		
+		//Generate necessary object files and link
+		smartCompilation(dependenceMap, stringSource, (string)target, (string)compilation);
 		
 		if(run){
 			printf("Running code:\n");
-			system(parentTarget.c_str());
+			system(target);
 		}
 	}
 }
