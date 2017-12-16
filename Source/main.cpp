@@ -157,6 +157,7 @@ int main(int argc, char ** argv){
 		string compiledFile = removeCharExt(target);
 		compiledFile += ".exe";
 		string parentTarget = "../" + compiledFile;
+		remove(parentTarget.c_str());
 		rename(compiledFile.c_str(), parentTarget.c_str());
 		
 		if(run){
