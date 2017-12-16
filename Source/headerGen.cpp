@@ -30,7 +30,7 @@ void generateHeader(char * inputFile, char * outputFile){
 	removeExtension(inputFileName);
 	
 	headersMade++;
-	fprintf(output, "#ifndef _PROCEDURALHEADER%d_%s_H_ //AutoTag\n", headersMade, inputFileName);
+	fprintf(output, "#ifndef _PROCEDURALHEADER%d_%s_H_\n", headersMade, inputFileName);
 	fprintf(output, "#define _PROCEDURALHEADER%d_%s_H_\n", headersMade, inputFileName);
 
 	int aux, i;

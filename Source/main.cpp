@@ -34,37 +34,6 @@ void printHelp(){
 	exit(0);
 }
 
-void placeAutoTag(char * fileName){		
-	FILE *input = fopen(fileName, "r");
-	if(input == NULL){
-		printf("COULD NOT OPEN FILE %s", fileName);
-		return;
-	}
-	
-	FILE *result = fopen("temp.autocpp", "w+");
-	
-	char buff[LINESZ];
-	fgets (buff, LINESZ, input);
-	
-	char autoTag[] = "//AutoTag\n";
-	
-	int len = strlen(buff);
-	if(buff[len-1] == '\n')
-		buff[--len] = '\0';
-	strcat(buff, autoTag);
-	
-	fprintf(result, "%s", buff);
-	while (fgets (buff, LINESZ, input)){
-		fprintf(result, "%s", buff);
-	}
-	
-	fclose(input);
-	fclose(result);
-	remove(fileName);
-	rename("temp.autocpp", fileName);
-	return;
-}
-
 int main(int argc, char ** argv){
 	bool beauty = false;
 	bool run = false;
@@ -150,11 +119,10 @@ int main(int argc, char ** argv){
 		strcat(compilation, " ");
 		
 		bool wroteCppFile = false;
-		if(isOverwritable(cppFile)){
+		if(!fileExist(cppFile)){
 			if(fileExist(cpyFile)){
 				replaceRawIncludes(cpyFile);
 				generateSource(cpyFile, cppFile, beauty);
-				placeAutoTag(cppFile);
 			}
 			else
 				printf("Required file: %s not found\n", cpyFile);
@@ -180,7 +148,7 @@ int main(int argc, char ** argv){
 
 	for(string fileName : requiredHeaders){
 		stringToH(fileName, headerFile);
-		if(isOverwritable(headerFile))
+		if(!fileExist(headerFile))
 			generateHeader(cppFile, headerFile);
 	}
 	

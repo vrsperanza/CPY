@@ -38,11 +38,31 @@ void CloneFilesToCompilationDirectory(const std::string& path){
     closedir(dpdf);
 }
 
+void clearDirectory(const std::string& path){
+    DIR *dpdf;
+    struct dirent *epdf;
+    dpdf = opendir(path.c_str());
+    if (dpdf != NULL){
+        while ((epdf = readdir(dpdf)) != NULL){
+            if(epdf->d_type==DT_REG){
+				string src = path+epdf->d_name;
+				remove(src.c_str());
+            }
+        }
+    }
+    closedir(dpdf);
+}
+
 void prepareFolder(){
 	if(!directoryExists(compilationDirectory)){
 		string sysCall = "mkdir ";
 		sysCall += compilationDirectory;
 		system(sysCall.c_str());
 	}
+	string compDir = "./";
+	compDir += compilationDirectory;
+	compDir += "/"; 
+	
+	clearDirectory(compDir);
 	CloneFilesToCompilationDirectory("./");
 }

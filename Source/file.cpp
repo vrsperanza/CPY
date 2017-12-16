@@ -16,27 +16,6 @@ bool fileExist (const char * fileName){
 	return false;
 }
 
-bool isOverwritable(const char * fileName){
-	FILE * f = fopen(fileName, "r");
-	if(f == NULL)
-		return true;
-	
-	char buff[LINESZ];
-	fgets (buff, LINESZ, f);
-	
-	fclose(f);
-	
-	int len = strlen(buff);
-	
-	char autoTag[] = "AutoTag";
-	
-	int i, j;
-	for(i = len - 8, j = 0; buff[i] != '\n' && buff[i] != '\0'; i++, j++)
-		if(buff[i] != autoTag[j])
-			return false;
-	return true;
-}
-
 void copyFile(const char * source, const char * dest){
     char buf[BUFSIZ];
     size_t size;
