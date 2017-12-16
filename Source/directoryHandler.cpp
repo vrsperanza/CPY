@@ -29,24 +29,14 @@ void CloneFilesToCompilationDirectory(const std::string& path){
 				string src = path+epdf->d_name;
 				string temp = compilationDirectory;
 				string dest = temp+"//"+epdf->d_name;
-				if(fileExist(dest.c_str()))
-					remove(dest.c_str());
-				copyFile(src.c_str(), dest.c_str());
-            }
-        }
-    }
-    closedir(dpdf);
-}
-
-void clearDirectory(const std::string& path){
-    DIR *dpdf;
-    struct dirent *epdf;
-    dpdf = opendir(path.c_str());
-    if (dpdf != NULL){
-        while ((epdf = readdir(dpdf)) != NULL){
-            if(epdf->d_type==DT_REG){
-				string src = path+epdf->d_name;
-				remove(src.c_str());
+				if(fileExist(dest.c_str())){
+					if(fileModifiedTime(dest.c_str()) < fileModifiedTime(src.c_str())){
+						remove(dest.c_str());
+						copyFile(src.c_str(), dest.c_str());
+					}
+				}
+				else
+					copyFile(src.c_str(), dest.c_str());
             }
         }
     }
@@ -59,10 +49,5 @@ void prepareFolder(){
 		sysCall += compilationDirectory;
 		system(sysCall.c_str());
 	}
-	string compDir = "./";
-	compDir += compilationDirectory;
-	compDir += "/"; 
-	
-	clearDirectory(compDir);
 	CloneFilesToCompilationDirectory("./");
 }

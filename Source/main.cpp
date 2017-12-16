@@ -18,7 +18,7 @@
 #include "extensionHandler.h"
 #include "dependenciesMapper.h"
 #include "rawIncludes.h"
-#include "folderHandler.h"
+#include "directoryHandler.h"
 
 using namespace std;
 
@@ -96,6 +96,7 @@ int main(int argc, char ** argv){
 	stack<string> dependenciesToProcess;
 	set<string> filesDone;
 	set<string> requiredHeaders;
+	set<string> allowedHeaders;
 	map<string, vector<string> > dependencies;
 	
 	dependenciesToProcess.push(stringSource);
@@ -123,9 +124,18 @@ int main(int argc, char ** argv){
 			if(fileExist(cpyFile)){
 				replaceRawIncludes(cpyFile);
 				generateSource(cpyFile, cppFile, beauty);
+				allowedHeaders.insert(fileName);
 			}
 			else
 				printf("Required file: %s not found\n", cpyFile);
+		} else {
+			if(fileExist(cpyFile)){
+				if(fileModifiedTime(cppFile) < fileModifiedTime(cpyFile)){
+					remove(cppFile);
+					generateSource(cpyFile, cppFile, beauty);
+					allowedHeaders.insert(fileName);
+				}
+			}
 		}
 		
 		dependences = getDependencies(cppFile);
@@ -147,9 +157,12 @@ int main(int argc, char ** argv){
 	}
 
 	for(string fileName : requiredHeaders){
-		stringToH(fileName, headerFile);
-		if(!fileExist(headerFile))
+		if(allowedHeaders.count(fileName)){
+			stringToH(fileName, headerFile);
+			if(fileExist(headerFile))
+				remove(headerFile);
 			generateHeader(cppFile, headerFile);
+		}
 	}
 	
 	if(compile){

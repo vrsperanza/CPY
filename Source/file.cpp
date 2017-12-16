@@ -10,6 +10,13 @@ using namespace std;
 #include <sys/stat.h>
 #include <stdlib.h>
 
+time_t fileModifiedTime(const char *path){
+    struct stat attr;
+    if (stat(path, &attr) == 0)
+        return attr.st_mtime;
+    return 0;
+}
+
 bool fileExist (const char * fileName){
 	if(access( fileName, F_OK ) != -1)
 		return true;
