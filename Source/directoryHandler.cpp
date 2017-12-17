@@ -1,6 +1,6 @@
 #include <iostream>
 #include "file.h"
-#include "globalHeader.h"
+#include "defines.h"
 #include "extensionHandler.h"
 
 #include <dirent.h>
@@ -16,6 +16,14 @@ void makeDirectory(const char * path){
 		sysCall += path;
 		system(sysCall.c_str());
 	}
+}
+
+void clearDirectory(const char * path){
+	DIR *dpdf = opendir(path);
+    struct dirent *epdf;
+	while ((epdf = readdir(dpdf)) != NULL)
+		remove(((string) path + (string)slash + (string)epdf->d_name).c_str());
+	closedir(dpdf);
 }
 
 void CloneFilesToCompilationDirectory(const std::string& path){
@@ -52,8 +60,10 @@ void CloneFilesToCompilationDirectory(const std::string& path){
     closedir(dpdf);
 }
 
-void prepareDirectory(){
+void prepareDirectory(bool cleanCompilation){
 	makeDirectory(compilationDirectory);
+	if(cleanCompilation)
+		clearDirectory(compilationDirectory);
 	CloneFilesToCompilationDirectory("./");
 }
 

@@ -9,7 +9,7 @@
 #include <stack>
 #include <iostream>
 
-#include "globalHeader.h"
+#include "defines.h"
 #include "sourceGen.h"
 #include "headerGen.h"
 #include "string.h"
@@ -17,7 +17,7 @@
 #include "line.h"
 #include "extensionHandler.h"
 #include "dependenciesMapper.h"
-#include "rawIncludes.h"
+#include "firstReplaces.h"
 #include "directoryHandler.h"
 
 using namespace std;
@@ -28,6 +28,7 @@ void printHelp(){
 	printf("\t-h: Shows this help page\n");
 	printf("\t-b: Use line breaks on itermediate code\n");
 	printf("\t-s: Silent compilation, only prints errors\n");
+	printf("\t-cl: Clean compilation, deletes CompilationSource before compiling\n");
 	printf("\t-ex: Exports project to a directory containing only c++ source and a Makefile\n");
 	printf("\t-r: Automatically runs compiled code\n");
 	printf("\t-nc: Doesn't compile resulting code\n");
@@ -101,7 +102,7 @@ int main(int argc, char ** argv){
 	bool compile = true;
 	bool silent = false;
 	bool exportProject = false;
-	
+	bool cleanCompilation = false;
 	
 	int i, j;
 	
@@ -138,6 +139,8 @@ int main(int argc, char ** argv){
 			run = false;
 		} else if(strcmp("-s", argument) == 0|| strcmp("-silent", argument) == 0){
 			silent = true;
+		} else if(strcmp("-cl", argument) == 0 || strcmp("-clear", argument) == 0 || strcmp("-clean", argument) == 0){
+			cleanCompilation = true;
 		} else if(strcmp("-ex", argument) == 0|| strcmp("-export", argument) == 0){
 			exportProject = true;
 			beauty = true;
@@ -157,7 +160,7 @@ int main(int argc, char ** argv){
 	}
 	
 	//Prepare compilation folder and move to it
-	prepareDirectory();
+	prepareDirectory(cleanCompilation);
 	chdir(compilationDirectory);
 	stringSource = cropPath(stringSource);
 	
@@ -190,6 +193,7 @@ int main(int argc, char ** argv){
 		if(!fileExist(cppFile)){
 			if(fileExist(cpyFile)){
 				replaceRawIncludes(cpyFile);
+				replaceQuickPrints(cpyFile);
 				generateSource(cpyFile, cppFile, beauty);
 				allowedHeaders.insert(fileName);
 			}

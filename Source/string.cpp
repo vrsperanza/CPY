@@ -2,7 +2,7 @@
 #include <string.h>
 using namespace std;
 
-#include "globalHeader.h"
+#include "defines.h"
 
 char strsub(char * a, char * b, int as){
 	int bs = 0;
@@ -48,9 +48,8 @@ void stringInsert(char * dest, string insert, int index){
 	for(i = index; dest[i] != '\0'; i++){
 		dest[i + len] = destCpy[i];
 	}	
-	dest[i + len + 1] = '\0';
-	
-	for(i = 0; insert[i] != '\0'; i++){
+	dest[i + len] = '\0';
+	for(i = 0; i < insert.size(); i++){
 		dest[i+index] = insert[i];
 	}
 }

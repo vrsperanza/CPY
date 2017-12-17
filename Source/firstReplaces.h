@@ -3,5 +3,6 @@
 
 bool replaceRawIncludesInner(const char * filename);
 void replaceRawIncludes(const char * filename);
+void replaceQuickPrints(const char * filename);
 
 #endif

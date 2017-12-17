@@ -40,16 +40,46 @@ int somefunction(string a, b)
 //Declares a and b as strings
 ```
 
-Can imply parenthesis (not mandatory) on if, switch, for and while:
+Can imply parenthesis on if, switch, for and while:
 ```
 	if x > 0
-		doSomething
+		...
 	else if x < 0
-		for int i = 0; i < 100; i++
-			something
-	else
-		while x--
+		...
+	for int i = 0; i < 100; i++
+		...
+	while x--
+		...
+	switch x
+		case 1:
 			...
+			break
+		...
+```
+
+Can imply ">>" and "<<" on cin and cout, switch, for and while:
+```
+	cin a b
+	cout a b endl
+```
+
+Two new print functions:
+```
+	! arg1 arg2 arg3
+	//! prints a new line, with each argument separated by spaces
+	
+	? arg1 arg2 arg3
+	//? is meant for debugging, prints a new debug line in the format:
+	//arg1=ContentOfArg1 | arg2 = ContentOfArg2 | arg3 = ContentOfArg3
+	
+	//Example:
+	a = 10
+	b = a + 5
+	! a b
+	? a b
+	//Generates the output:
+	10 15
+	a = 10 | b = 15
 ```
 
 New precompilation tag: #raw "file"

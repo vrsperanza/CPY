@@ -3,7 +3,7 @@
 #include <vector>
 using namespace std;
 #include "extensionHandler.h"
-#include "globalHeader.h"
+#include "defines.h"
 #include "line.h"
 
 vector<string> getDependencies(char * inputFile){

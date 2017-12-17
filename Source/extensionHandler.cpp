@@ -2,7 +2,7 @@
 #include <string.h>
 using namespace std;
 
-#include "globalHeader.h"
+#include "defines.h"
 
 void removeExtension(char * s){
 	int i;

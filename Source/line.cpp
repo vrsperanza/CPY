@@ -5,7 +5,7 @@
 #include "string.h"
 using namespace std;
 
-#include "globalHeader.h"
+#include "defines.h"
 
 void addPahrenthesis(char * s){	
 	int offset = 0;

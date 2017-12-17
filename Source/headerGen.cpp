@@ -5,7 +5,7 @@ using namespace std;
 #include <stdio.h>
 #include <string.h>
 
-#include "globalHeader.h"
+#include "defines.h"
 #include "sourceGen.h"
 #include "headerGen.h"
 #include "string.h"
@@ -13,13 +13,12 @@ using namespace std;
 #include "line.h"
 #include "extensionHandler.h"
 #include "dependenciesMapper.h"
-#include "rawIncludes.h"
 
 int headersMade = 0;
 void generateHeader(char * inputFile, char * outputFile){	
 	FILE * input = fopen(inputFile, "r");
 	FILE * output = fopen(outputFile, "w+");
-	FILE * temp = fopen("temp.autocpp", "w+");
+	FILE * temp = fopen(tempFile, "w+");
 	
 	char inputFileHeader[100];
 	strcpy(inputFileHeader, inputFile);
@@ -142,5 +141,5 @@ void generateHeader(char * inputFile, char * outputFile){
 	fclose(temp);
 	
 	remove(inputFile);
-	rename("temp.autocpp", inputFile);
+	rename(tempFile, inputFile);
 }

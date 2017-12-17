@@ -8,7 +8,7 @@
 #include <stack>
 using namespace std;
 
-#include "globalHeader.h"
+#include "defines.h"
 #include "sourceGen.h"
 #include "headerGen.h"
 #include "string.h"
@@ -16,7 +16,7 @@ using namespace std;
 #include "line.h"
 #include "extensionHandler.h"
 #include "dependenciesMapper.h"
-#include "rawIncludes.h"
+#include "firstReplaces.h"
 
 FILE * input;
 FILE * output;
