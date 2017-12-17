@@ -55,8 +55,8 @@ Can imply parenthesis (not mandatory) on if, switch, for and while:
 New precompilation tag: #raw "file"
 Includes file's content directly in code before exporting, usefull if you can only send one file instead of a project - intended for  templates at competitive coding.
 
-Can be compiled alongside normal cpp files, so hybrid projects are possible
-cpy can also compile pure cpp projects, it will automatically link files and compile them intelligently
+Can be compiled alongside normal cpp files, so hybrid projects are possible <br />
+CPY can also compile pure cpp projects, it will automatically link files and compile them intelligently
 
 Only edits clones of the source files in a separate folder
 
