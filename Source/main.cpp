@@ -27,6 +27,7 @@ void printHelp(){
 	printf("Flags:\n");
 	printf("\t-h: Shows this help page\n");
 	printf("\t-b: Use line breaks on itermediate code\n");
+	printf("\t-s: Silent compilation, only prints errors\n");
 	printf("\t-r: Automatically runs compiled code\n");
 	printf("\t-nc: Doesn't compile resulting code\n");
 	printf("\t-o target: Specifies target executable name, when not specified target = a\n");
@@ -34,7 +35,7 @@ void printHelp(){
 	exit(0);
 }
 
-void smartCompilation(map<string, vector<string> > dependenceMap, string mainFile, string target, string compilation){
+void smartCompilation(map<string, vector<string> > dependenceMap, string mainFile, string target, string compilation, bool silent){
 	set<string> generatedObjects;
 	stack<string> toProcess;
 	generatedObjects.insert(mainFile);
@@ -54,7 +55,9 @@ void smartCompilation(map<string, vector<string> > dependenceMap, string mainFil
 		
 		if(fileModifiedTime(targetObject.c_str()) < fileModifiedTime(cppSource.c_str())){
 			systemCall = "g++ -c " + cppSource + " -o " + targetObject;
-			cout << systemCall << endl;
+			
+			if(!silent)
+				cout << systemCall << endl;
 			system(systemCall.c_str());
 			
 			//One object file was updated, linking has to happen again
@@ -80,12 +83,14 @@ void smartCompilation(map<string, vector<string> > dependenceMap, string mainFil
 		for(string object : generatedObjects){
 			compilation += object + ".o ";
 		}
-		cout << compilation << endl;
+		if(!silent)
+			cout << compilation << endl;
 		system(compilation.c_str());
 		remove(trueTarget.c_str());
 		rename(target.c_str(), trueTarget.c_str());
 	} else {
-		cout << target << " is up to date\n";
+		if(!silent)
+			cout << target << " is up to date\n";
 	}
 }
 
@@ -93,6 +98,7 @@ int main(int argc, char ** argv){
 	bool beauty = false;
 	bool run = false;
 	bool compile = true;
+	bool silent = false;
 	
 	int i, j;
 	
@@ -127,6 +133,8 @@ int main(int argc, char ** argv){
 		} else if(strcmp("-nc", argument) == 0|| strcmp("-nocompile", argument) == 0){
 			compile = false;
 			run = false;
+		} else if(strcmp("-s", argument) == 0|| strcmp("-silent", argument) == 0){
+			silent = true;
 		} else if(strcmp("-h", argument) == 0 || strcmp("-help", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
 			printHelp();
 		} else {
@@ -222,7 +230,7 @@ int main(int argc, char ** argv){
 	//Compile files
 	if(compile){		
 		//Generate necessary object files and link
-		smartCompilation(dependenceMap, stringSource, (string)target, (string)compilation);
+		smartCompilation(dependenceMap, stringSource, (string)target, (string)compilation, silent);
 		
 		if(run){
 			printf("Running code:\n");

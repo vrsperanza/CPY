@@ -87,6 +87,7 @@ USAGE: cpy SourceCode Flags
 Flags:
         -h: Shows this help page
         -b: Use line breaks on itermediate code
+        -s: Silent compilation, only prints errors
         -r: Automatically runs compiled code
         -nc: Doesn't compile resulting code
         -o target: Specifies target executable name, when not specified target = a
