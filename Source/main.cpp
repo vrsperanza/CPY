@@ -140,6 +140,7 @@ int main(int argc, char ** argv){
 			silent = true;
 		} else if(strcmp("-ex", argument) == 0|| strcmp("-export", argument) == 0){
 			exportProject = true;
+			beauty = true;
 		} else if(strcmp("-h", argument) == 0 || strcmp("-help", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
 			printHelp();
 		} else {
