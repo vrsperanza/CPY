@@ -18,8 +18,10 @@ In any of the given examples, "cpy mainFile.cpy" will create a working executabl
 
 Features:
 
-Generates all the necessary headers and calls g++ for all the linked files
-	If you include a header "#include "somecode.h"" of a "somecode.cpy", the header will be generated (as well as the cpp file), compilation will run and they will be removed (unless you use the -k (keep) flag)
+Generates all the necessary headers and compiles resulting project. If you include a header "#include "somecode.h"" of a "somecode.cpy", the header will be generated (as well as the cpp file)
+
+Default compilation is optimized in makefile style, only recompiling modified files, increasing overall compilation speed
+With the use of a flag (-ex) generates a c++ project folder, makefile included, ready for sharing
 
 Implies semicolons from endlines,
 Implies {} using identation,
@@ -28,59 +30,33 @@ Implies variable types from assignment:
 ```
 a = 10
 b = a
+//Declares a and b as integers
 ```
-Declares a and b as integers
 
 Implies function argument types based on previous:
 ```
-	This:
-	int somefunction(int someArgument, someArgument2)
-		someCode
-	
-	Becomes:
-	int somefunction(int someArgument, int someArgument2){
-		someCode;
-	}
-	Is compiled and then removed
+int somefunction(string a, b)
+	code...
+//Declares a and b as strings
 ```
 
-Can imply parenthesis on if, switch, for and while:
+Can imply parenthesis (not mandatory) on if, switch, for and while:
 ```
-	This:
 	if x > 0
 		doSomething
 	else if x < 0
 		for int i = 0; i < 100; i++
 			something
 	else
-		YetAnothersomething
-	
-	if(somethingCondition)
-		...
-	
-	Becomes:
-	if(x > 0){
-		doSomething;
-	}
-	else if(x < 0){
-		for(int i = 0; i < 100; i++){
-			something;
-		}
-	}
-	else{
-		YetAnothersomething;
-	}
-	
-	if(somethingCondition){
-		...
-	}
+		while x--
+			...
 ```
 
 New precompilation tag: #raw "file"
-Includes file's content directly in code before calling g++, usefull if you can only send one file instead of a big project - intended for competitive coding.
+Includes file's content directly in code before exporting, usefull if you can only send one file instead of a project - intended for  templates at competitive coding.
 
 Can be compiled alongside normal cpp files, so hybrid projects are possible
-Cpy can also compile pure cpp projects, it will automatically link files and compile them makefile style
+cpy can also compile pure cpp projects, it will automatically link files and compile them intelligently
 
 Only edits clones of the source files in a separate folder
 
