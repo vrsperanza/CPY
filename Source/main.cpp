@@ -203,6 +203,8 @@ int main(int argc, char ** argv){
 			if(fileExist(cpyFile)){
 				if(fileModifiedTime(cppFile) < fileModifiedTime(cpyFile)){
 					remove(cppFile);
+					replaceRawIncludes(cpyFile);
+					replaceQuickPrints(cpyFile);
 					generateSource(cpyFile, cppFile, beauty);
 					allowedHeaders.insert(fileName);
 				}
