@@ -70,7 +70,7 @@ Two new print functions:
 	
 	? arg1 arg2 arg3
 	//? is meant for debugging, prints a new debug line in the format:
-	//arg1=ContentOfArg1 | arg2 = ContentOfArg2 | arg3 = ContentOfArg3
+	//arg1 = ContentOfArg1 | arg2 = ContentOfArg2 | arg3 = ContentOfArg3
 	
 	//Example:
 	a = 10
