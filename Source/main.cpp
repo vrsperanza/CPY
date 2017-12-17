@@ -28,6 +28,7 @@ void printHelp(){
 	printf("\t-h: Shows this help page\n");
 	printf("\t-b: Use line breaks on itermediate code\n");
 	printf("\t-s: Silent compilation, only prints errors\n");
+	printf("\t-ex: Exports project to a directory containing only c++ source and a Makefile\n");
 	printf("\t-r: Automatically runs compiled code\n");
 	printf("\t-nc: Doesn't compile resulting code\n");
 	printf("\t-o target: Specifies target executable name, when not specified target = a\n");
@@ -99,6 +100,8 @@ int main(int argc, char ** argv){
 	bool run = false;
 	bool compile = true;
 	bool silent = false;
+	bool exportProject = false;
+	
 	
 	int i, j;
 	
@@ -135,6 +138,8 @@ int main(int argc, char ** argv){
 			run = false;
 		} else if(strcmp("-s", argument) == 0|| strcmp("-silent", argument) == 0){
 			silent = true;
+		} else if(strcmp("-ex", argument) == 0|| strcmp("-export", argument) == 0){
+			exportProject = true;
 		} else if(strcmp("-h", argument) == 0 || strcmp("-help", argument) == 0 || strcmp("-?", argument) == 0 || strcmp("?", argument) == 0 || strcmp("help", argument) == 0){
 			printHelp();
 		} else {
@@ -151,7 +156,7 @@ int main(int argc, char ** argv){
 	}
 	
 	//Prepare compilation folder and move to it
-	prepareFolder();
+	prepareDirectory();
 	chdir(compilationDirectory);
 	stringSource = cropPath(stringSource);
 	
@@ -225,6 +230,10 @@ int main(int argc, char ** argv){
 				remove(headerFile);
 			generateHeader(cppFile, headerFile);
 		}
+	}
+	
+	if(exportProject){
+		createExportDirectory(filesDone, target);
 	}
 	
 	//Compile files

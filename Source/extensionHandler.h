@@ -13,5 +13,6 @@ void stringToH(std::string input, char * fileName);
 std::string getExtension(std::string input);
 std::string cropPath(std::string input);
 bool isCodeFile(std::string input);
+bool isCppFile(std::string input);
 
 #endif

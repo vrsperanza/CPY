@@ -1,2 +1,2 @@
-make cpy.exe
+make cpy
 move cpy.exe C:\Cpy

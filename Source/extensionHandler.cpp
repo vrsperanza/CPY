@@ -91,3 +91,8 @@ bool isCodeFile(string input){
 	string ext = getExtension(input);
 	return (ext == ".cpy" || ext == ".cpp" || ext == ".h");
 }
+
+bool isCppFile(string input){
+	string ext = getExtension(input);
+	return (ext == ".cpp" || ext == ".h");
+}

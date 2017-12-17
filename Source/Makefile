@@ -1,7 +1,7 @@
 all: 
 	g++ -o cpy main.cpp dependenciesMapper.cpp extensionHandler.cpp file.cpp directoryHandler.cpp headerGen.cpp line.cpp rawIncludes.cpp sourceGen.cpp string.cpp
 
-cpy.exe: main.o dependenciesMapper.o extensionHandler.o file.o directoryHandler.o headerGen.o line.o rawIncludes.o sourceGen.o string.o
+cpy: main.o dependenciesMapper.o extensionHandler.o file.o directoryHandler.o headerGen.o line.o rawIncludes.o sourceGen.o string.o
 	g++ -o cpy main.o dependenciesMapper.o extensionHandler.o file.o directoryHandler.o headerGen.o line.o rawIncludes.o sourceGen.o string.o
 main.o: main.cpp
 dependenciesMapper.o: dependenciesMapper.cpp

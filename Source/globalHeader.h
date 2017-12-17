@@ -4,12 +4,15 @@
 #define LINESZ 16384
 #define tabSpaces 4
 
-#define compilationDirectory "CompilationSourceResult"
+#define compilationDirectory "CompilationSource"
+#define resultProjectDirectory "ExportedProject"
 
 #define tempFile "autofile.temp"
 
-#include <string>
-#include <vector>
-#include <unordered_set>
+#ifdef _WIN32
+#define slash "\\"
+#else	
+#define slash "/"
+#endif
 
 #endif

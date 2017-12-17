@@ -1,6 +1,7 @@
 #ifndef _FOLDERHANDLER_H_
 #define _FOLDERHANDLER_H_
 
-void prepareFolder();
+void prepareDirectory();
+void createExportDirectory(set<string> filesDone, string target);
 
 #endif
