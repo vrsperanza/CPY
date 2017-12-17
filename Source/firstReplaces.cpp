@@ -21,9 +21,9 @@ bool exclamationPrintParse(char * line){
 	
 	if((i == -1 || line[i] == '\n') && pos != -1){		
 		int i = pos;
-		line[i] = 's';
-		stringInsert(line, "td::cout", i+1);
-		i += 9;
+		line[i] = ' ';
+		stringInsert(line, "std::cout", i+1);
+		i += 10;
 		while(stringContainsChar(" \t\n", line[i]) && line[i] != '\0')
 			i++;
 		
@@ -63,9 +63,9 @@ bool interrogationPrintParse(char * line){
 	
 	if((i == -1 || line[i] == '\n') && pos != -1){
 		i = pos;
-		line[i] = 's';
-		stringInsert(line, "td::cout", i+1);
-		i += 9;
+		line[i] = ' ';
+		stringInsert(line, "std::cout", i+1);
+		i += 10;
 		
 		bool first = true;
 		while(line[i] != '\n' && line[i] != '\0'){
@@ -115,82 +115,89 @@ bool interrogationPrintParse(char * line){
 
 bool coutPrintParse(char * line){
 	int pos = string_isSubstring(line, "cout");
+	if(line[pos+4] != ' ' && line[pos+4] != '\t')
+		return false;
+	if(pos > 0 && line[pos-1] != ' ' && line[pos-1] != '\t' && line[pos-1] != ':')
+		return false;
+	if(pos == -1)
+		return false;
 	
-	if(pos != -1){
-		for(int i = 0; line[i] != '\0'; i++){
-			if(line[i] == '\"'){
-				i++;
-				while(line[i] != '\"' && line[i] != '\0') i++;
-			}
-			
-			if(line[i] == '<' && line[i+1] == '<')
-				return false;
+	for(int i = 0; line[i] != '\0'; i++){
+		if(line[i] == '\"'){
+			i++;
+			while(line[i] != '\"' && line[i] != '\0') i++;
 		}
 		
-		int i = pos;
-		
-		while(line[i] != '\n' && line[i] != '\0'){
-			
-			if(line[i] == '\"' && line[i-1] != '\\'){
-				i++;
-				while(!(line[i] == '\"' && line[i-1] != '\\') && line[i] != '\0') i++;
-			}
-			
-			while(!stringContainsChar(" \t\n", line[i]) && line[i] != '\0') i++;
-			
-			int insertPos = i;
-			
-			while(stringContainsChar(" \t\n", line[i]) && line[i] != '\0') i++;
-			
-			
-			if(line[i] != '\n' && line[i] != '\0'){
-				stringInsert(line, " <<", insertPos);
-				i += 3;
-			}
-		}
-		return true;
+		if(line[i] == '<' && line[i+1] == '<')
+			return false;
 	}
-	else return false;
+	
+	int i = pos;
+	
+	while(line[i] != '\n' && line[i] != '\0'){
+		
+		if(line[i] == '\"' && line[i-1] != '\\'){
+			i++;
+			while(!(line[i] == '\"' && line[i-1] != '\\') && line[i] != '\0') i++;
+		}
+		
+		while(!stringContainsChar(" \t\n", line[i]) && line[i] != '\0') i++;
+		
+		int insertPos = i;
+		
+		while(stringContainsChar(" \t\n", line[i]) && line[i] != '\0') i++;
+		
+		
+		if(line[i] != '\n' && line[i] != '\0'){
+			stringInsert(line, " <<", insertPos);
+			i += 3;
+		}
+	}
+	return true;
 }
 
 bool cinPrintParse(char * line){
 	int pos = string_isSubstring(line, "cin");
 	
-	if(pos != -1){
-		for(int i = 0; line[i] != '\0'; i++){
-			if(line[i] == '\"' && line[i-1] != '\\'){
-				i++;
-				while(!(line[i] == '\"' && line[i-1] != '\\') && line[i] != '\0') i++;
-			}
-			
-			if(line[i] == '>' && line[i+1] == '>')
-				return false;
+	if(line[pos+3] != ' ' && line[pos+3] != '\t')
+		return false;
+	if(pos > 0 && line[pos-1] != ' ' && line[pos-1] != '\t' && line[pos-1] != ':')
+		return false;
+	if(pos == -1)
+		return false;
+	
+	for(int i = 0; line[i] != '\0'; i++){
+		if(line[i] == '\"' && line[i-1] != '\\'){
+			i++;
+			while(!(line[i] == '\"' && line[i-1] != '\\') && line[i] != '\0') i++;
 		}
 		
-		int i = pos;
-		
-		while(line[i] != '\n' && line[i] != '\0'){
-			
-			if(line[i] == '\"'){
-				i++;
-				while(line[i] != '\"' && line[i] != '\0') i++;
-			}
-			
-			while(!stringContainsChar(" \t\n", line[i]) && line[i] != '\0') i++;
-			
-			int insertPos = i;
-			
-			while(stringContainsChar(" \t\n", line[i]) && line[i] != '\0') i++;
-			
-			
-			if(line[i] != '\n' && line[i] != '\0'){
-				stringInsert(line, " >>", insertPos);
-				i += 3;
-			}
-		}
-		return true;
+		if(line[i] == '>' && line[i+1] == '>')
+			return false;
 	}
-	else return false;
+	
+	int i = pos;
+	
+	while(line[i] != '\n' && line[i] != '\0'){
+		
+		if(line[i] == '\"'){
+			i++;
+			while(line[i] != '\"' && line[i] != '\0') i++;
+		}
+		
+		while(!stringContainsChar(" \t\n", line[i]) && line[i] != '\0') i++;
+		
+		int insertPos = i;
+		
+		while(stringContainsChar(" \t\n", line[i]) && line[i] != '\0') i++;
+		
+		
+		if(line[i] != '\n' && line[i] != '\0'){
+			stringInsert(line, " >>", insertPos);
+			i += 3;
+		}
+	}
+	return true;
 }
 
 void replaceQuickPrints(const char * filename){
