@@ -79,8 +79,10 @@ Can imply parenthesis on if, switch, for and while:
 New precompilation tag: #raw "file"
 Includes file's content directly in code before calling g++, usefull if you can only send one file instead of a big project - intended for competitive coding.
 
-Can be compiled alongside normal cpp files; Has some safety features to block deletion of other source files
-Currently it is possible to have some .cpy files and some .cpp, it will create .cpp and .h files from .cpy only if they are not present or procedurally generated (if you choose to keep them with -k), linking doesn't edit files, so it is (untested) possible to compile a complete cpp project running "cpy main.cpp"
+Can be compiled alongside normal cpp files, so hybrid projects are possible
+Cpy can also compile pure cpp projects, it will automatically link files and compile them makefile style
+
+Only edits clones of the source files in a separate folder
 
 ```
 USAGE: cpy SourceCode Flags
