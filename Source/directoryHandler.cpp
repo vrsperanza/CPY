@@ -57,6 +57,26 @@ void prepareDirectory(){
 	CloneFilesToCompilationDirectory("./");
 }
 
+void buildMakefile(string dirPath, set<string> filesDone, string target){
+	FILE * makefile = fopen((dirPath + (string)slash + (string)"Makefile").c_str(), "w+");
+	fprintf(makefile, "all:\n");
+	fprintf(makefile, "\tg++ -o %s ", target.c_str());
+	for(string file : filesDone)
+		fprintf(makefile, "%s.cpp ", file.c_str());
+	
+	fprintf(makefile, "\n\n%s: ", target.c_str());
+	for(string file : filesDone)
+		fprintf(makefile, "%s.o ", file.c_str());
+	fprintf(makefile, "\n\tg++ -o %s ", target.c_str());
+	for(string file : filesDone)
+		fprintf(makefile, "%s.o ", file.c_str());
+	
+	for(string file : filesDone)
+		fprintf(makefile, "\n%s.o: %s.cpp ", file.c_str(), file.c_str());
+	
+	fclose(makefile);
+}
+
 void createExportDirectory(set<string> filesDone, string target){
     DIR *dpdf = opendir("./");
     struct dirent *epdf;
@@ -76,40 +96,6 @@ void createExportDirectory(set<string> filesDone, string target){
 		}
 	}
 	
-	FILE * makefile = fopen((dirPath + (string)slash + (string)"Makefile").c_str(), "w+");
-	fprintf(makefile, "all:\n");
-	fprintf(makefile, "\tg++ -o %s ", target.c_str());
-	for(string file : filesDone)
-		fprintf(makefile, "%s.cpp ", file.c_str());
-	
-	fprintf(makefile, "\n\n%s: ", target.c_str());
-	for(string file : filesDone)
-		fprintf(makefile, "%s.o ", file.c_str());
-	fprintf(makefile, "\n\tg++ -o %s ", target.c_str());
-	for(string file : filesDone)
-		fprintf(makefile, "%s.o ", file.c_str());
-	
-	for(string file : filesDone)
-		fprintf(makefile, "\n%s.o: %s.cpp ", file.c_str(), file.c_str());
-	
-	fclose(makefile);
+	buildMakefile(dirPath, filesDone, target);
 	closedir(dpdf);
 }
-
-/*
-all: 
-	g++ -o cpy main.cpp dependenciesMapper.cpp extensionHandler.cpp file.cpp directoryHandler.cpp headerGen.cpp line.cpp rawIncludes.cpp sourceGen.cpp string.cpp
-
-cpy: main.o dependenciesMapper.o extensionHandler.o file.o directoryHandler.o headerGen.o line.o rawIncludes.o sourceGen.o string.o
-	g++ -o cpy main.o dependenciesMapper.o extensionHandler.o file.o directoryHandler.o headerGen.o line.o rawIncludes.o sourceGen.o string.o
-main.o: main.cpp
-dependenciesMapper.o: dependenciesMapper.cpp
-extensionHandler.o: extensionHandler.cpp
-file.o: file.cpp
-directoryHandler.o: directoryHandler.cpp
-headerGen.o: headerGen.cpp
-line.o: line.cpp
-rawIncludes.o: rawIncludes.cpp
-sourceGen.o: sourceGen.cpp
-string.o: string.cpp
-*/
