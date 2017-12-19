@@ -22,7 +22,7 @@ bool exclamationPrintParse(char * line){
 	if((i == -1 || line[i] == '\n') && pos != -1){		
 		int i = pos;
 		line[i] = ' ';
-		stringInsert(line, "std::cout", i+1);
+		stringInsert(line, "std::cout", i);
 		i += 10;
 		while(stringContainsChar(" \t\n", line[i]) && line[i] != '\0')
 			i++;
@@ -64,7 +64,7 @@ bool interrogationPrintParse(char * line){
 	if((i == -1 || line[i] == '\n') && pos != -1){
 		i = pos;
 		line[i] = ' ';
-		stringInsert(line, "std::cout", i+1);
+		stringInsert(line, "std::cout", i);
 		i += 10;
 		
 		bool first = true;
@@ -280,4 +280,138 @@ void replaceRawIncludes(const char * filename){
 	while(replaceRawIncludesInner(filename) && timeout--);
 	if(timeout <= 0)
 		printf("Too many iterations on raw replacement | File: %s\n", filename);
+}
+
+void joinContinuedLines(const char * filename){
+	FILE * input = fopen(filename, "r");
+	if(input == NULL)
+		return;
+	
+	FILE * output = fopen(tempFile, "w+");
+	char line[LINESZ];
+	while (fgets (line, LINESZ, input)) {
+		for(int i = 0; line[i] != '\0';){
+			int j = i+1;
+			while(stringContainsChar(" \t", line[j])) j++;
+			if(line[i] == '\\' && line[j] == '\n'){
+				line[i] = ' ';
+				line[j] = ' ';
+			}
+			i = j;
+		}
+		fprintf(output, "%s", line);
+	}
+	fclose(input);
+	fclose(output);
+	remove(filename);
+	rename(tempFile, filename);
+	return;
+	
+}
+
+void formatLineSpacing(char * line){
+	int resultPos = 0;
+	int i = 0;
+	while(line[i] == ' ' || line[i] == '\t')
+		line[resultPos++] = line[i++];
+	
+	while(line[i] != '\0'){
+		line[resultPos++] = line[i++];
+		if(line[i] == ' ' || line[i] == '\t'){
+			line[resultPos++] = ' ';
+			while(line[i] == ' ' || line[i] == '\t')
+				i++;
+		}
+	}
+	if(line[i-1] == ' ')
+		line[resultPos-1] = '\0';
+	else
+		line[resultPos] = '\0';
+}
+
+void implyWordSeparationSpaces(char * line){
+	if(line[0] == '#')
+		return;
+	
+	string resultString = "";
+	for(int i = 0; line[i] != '\0'; i++){
+		
+		if(line[i] == '\"' && line[i-1] != '\\'){
+			resultString += line[i++];
+			while(!(line[i] == '\"' && line[i-1] != '\\') && line[i] != '\0')
+				resultString += line[i++];
+		}
+		
+		int j = i;
+		while(stringContainsChar("+-*/%=<>&^|!?,", line[j]))
+			j++;
+		
+		if(i != j){
+			char last;
+			char next;
+			int k = i-1;
+			while((line[k] == ' ' || line[k] == '\t') && k >= 0)
+				k--;
+			if(k != -1)
+				last = line[k];
+			else
+				last = '\0';
+			
+			bool isOperator = !stringContainsChar("+-*/%=<>&^|!?,;.({[", last) && last != '\0';
+			
+			
+			if(	isOperator && 
+				(line[i] != '/' || line[i+1] != '/') &&
+				(line[i] != '/' || line[i+1] != '*') &&
+				(line[i] != '*' || line[i+1] != '/') &&
+				(line[i] != '-' || line[i+1] != '>') &&
+				line[i] != ',')
+				resultString += ' ';
+			
+			
+			k = i;
+			while(k < j)
+				resultString += line[k++];
+			
+			if(	isOperator && 
+				(line[i] != '/' || line[i+1] != '/') &&
+				(line[i] != '/' || line[i+1] != '*') &&
+				(line[i] != '*' || line[i+1] != '/') &&
+				(line[i] != '-' || line[i+1] != '>'))
+				resultString += ' ';
+				
+			i = k-1;
+		}
+		else{
+			resultString += line[i];
+		}
+	}
+	
+	strcpy(line, resultString.c_str());
+}
+
+void formatSpacing(const char * filename){
+	FILE * input = fopen(filename, "r");
+	if(input == NULL)
+		return;
+	
+	FILE * output = fopen(tempFile, "w+");
+	char line[LINESZ];
+	while (fgets (line, LINESZ, input)) {
+		implyWordSeparationSpaces(line);
+		formatLineSpacing(line);
+		fprintf(output, "%s", line);
+	}
+	fclose(input);
+	fclose(output);
+	remove(filename);
+	rename(tempFile, filename);
+	return;
+}
+
+void firstReplaces(const char * filename){
+	joinContinuedLines(filename);
+	replaceRawIncludes(filename);
+	replaceQuickPrints(filename);
+	formatSpacing(filename);
 }

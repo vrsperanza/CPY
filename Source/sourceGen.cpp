@@ -37,6 +37,121 @@ bool structTypedef;
 char structName[LINESZ];
 std::vector<std::unordered_set<std::string> > seenWords;
 
+void addPahrenthesis(char * s){	
+	int offset = 0;
+	for(offset = 0; stringContainsChar(" \n\t", s[offset]); offset++)
+		if(s[offset+1] == '/' && s[offset+2] == '/')
+			while(s[offset] != '\n')
+				offset++;
+	
+	if(string_isSubstring(s, "struct") >= 0)
+		return;
+	
+	int len = strlen(s);
+	
+	if(s[len-2] == '{'){
+		int lookStart = max(max(max(
+			string_isSubstring(s, "if"),
+			string_isSubstring(s, "for")),
+			string_isSubstring(s, "while")),
+			string_isSubstring(s, "switch"));
+		
+		if(lookStart == -1){
+			implyFunctionParametersType(s);
+		}
+		else{
+			int i = lookStart;
+			while(stringContainsChar(" \t\n", s[i]))
+				i++;
+			
+			bool imply = true;
+			
+			while(!stringContainsChar(" \t\n(", s[i]) && s[i] != '\0') i++;
+			while(stringContainsChar(" \t\n", s[i])) i++;
+			
+			int parenthesisCount = 0;
+			for(; s[i] != '\0'; i++){
+				if(s[i] == '(')
+					parenthesisCount++;
+				else if(s[i] == ')')
+					parenthesisCount--;
+				
+				if(parenthesisCount == 0){
+					if(s[i] == ')')
+						i++;
+					while(stringContainsChar(" \t\n{;", s[i]))
+						i++;
+					imply = !(s[i] == '\0');
+					break;
+				}
+			}
+			
+			if(imply){
+				for(i = lookStart; s[i] != '\0'; i++){
+					if(s[i] == ' ' || s[i] == '\t'){
+						s[i] = '(';
+						break;
+					}
+				}
+				
+				s[len-2] = ')';
+				s[len-1] = '{';
+				s[len] = '\n';
+				s[len+1] = '\0';
+			}
+		}
+	}
+}
+
+void implyFunctionParametersType(char * s){	
+	char lastType[LINESZ] = "\0";
+	int wordCount = 0;
+	
+	int typeStartIndex = 0;
+	
+	int i;
+	for(i = 0; s[i] != '(' && s[i] != '\0'; i++);
+	
+	if(s[i] == '(') i++;
+	
+	while(s[i] == ' ' || s[i] == '\t') i++;
+	
+	int wordStartIndex = i;
+	int wordEndIndex = i;
+	int lastWordEndIndex = i;
+	
+	while(s[i] != '\0' && s[i] != '\n'){
+		wordCount++;
+		while(s[i] != ' ' && s[i] != '\t' && s[i] != '\0' && s[i] != '\n' &&  s[i] != ',' &&  s[i] != '(' &&  s[i] != '=') i++;
+		
+		lastWordEndIndex = wordEndIndex;
+		wordEndIndex = i;
+		
+		while(s[i] == ' ' || s[i] == '\t') i++;
+		
+		if(s[i] == '=') while(!(s[i] == ',' || s[i] == '\n' || s[i] == '\0')) i++;
+			
+		
+		if(s[i] == '(' || s[i] == ',' || s[i] == '\n' || s[i] == '\0'){
+			if(wordCount == 1){
+				strInsert(s, lastType, wordStartIndex);
+				while(!(s[i] == '(' || s[i] == ',' || s[i] == '\n' || s[i] == '\0')) i++;
+			} else if (wordCount > 1) {
+				int j;
+				for(j = wordStartIndex; j < lastWordEndIndex; j++){
+					lastType[j-wordStartIndex] = s[j];
+				}
+				lastType[j-wordStartIndex] = ' ';
+				lastType[j-wordStartIndex+1] = '\0';
+			}
+			wordCount = 0;
+			i++;
+			while(s[i] == ' ' || s[i] == '\t') i++;
+			wordStartIndex = i;
+		}
+	}
+}
+
 void implyVariablesType(char * line){
 	vector<string> words;
 	string word = "";
@@ -215,22 +330,8 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 			buffLen = strlen(buff);
 		}
 		
-		//Concat \ lines
-		int buffLen = strlen(buff);
-		while(buff[buffLen-2] == '\\'){
-			fgets (buff2, LINESZ, input);
-			if(buff[buffLen-2] == '\\'){
-				buff[buffLen-2] = '\n';
-				buff[buffLen-1] = '\0';
-			}
-			strcat(buff, buff2);
-			buffLen = strlen(buff);
-		}
-		
-		
-		
-		
 		//Read tab spaces
+		int buffLen = strlen(buff);
 		int offset = 0;
 		for(i = 0; i < buffLen; i++){
 			if(buff[i] == '\t')

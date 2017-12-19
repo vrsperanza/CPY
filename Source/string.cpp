@@ -54,55 +54,6 @@ void stringInsert(char * dest, string insert, int index){
 	}
 }
 
-void implyFunctionParametersType(char * s){	
-	char lastType[LINESZ] = "\0";
-	int wordCount = 0;
-	
-	int typeStartIndex = 0;
-	
-	int i;
-	for(i = 0; s[i] != '(' && s[i] != '\0'; i++);
-	
-	if(s[i] == '(') i++;
-	
-	while(s[i] == ' ' || s[i] == '\t') i++;
-	
-	int wordStartIndex = i;
-	int wordEndIndex = i;
-	int lastWordEndIndex = i;
-	
-	while(s[i] != '\0' && s[i] != '\n'){
-		wordCount++;
-		while(s[i] != ' ' && s[i] != '\t' && s[i] != '\0' && s[i] != '\n' &&  s[i] != ',' &&  s[i] != '(' &&  s[i] != '=') i++;
-		
-		lastWordEndIndex = wordEndIndex;
-		wordEndIndex = i;
-		
-		while(s[i] == ' ' || s[i] == '\t') i++;
-		
-		if(s[i] == '=') while(!(s[i] == ',' || s[i] == '\n' || s[i] == '\0')) i++;
-			
-		
-		if(s[i] == '(' || s[i] == ',' || s[i] == '\n' || s[i] == '\0'){
-			if(wordCount == 1){
-				strInsert(s, lastType, wordStartIndex);
-				while(!(s[i] == '(' || s[i] == ',' || s[i] == '\n' || s[i] == '\0')) i++;
-			} else if (wordCount > 1) {
-				int j;
-				for(j = wordStartIndex; j < lastWordEndIndex; j++){
-					lastType[j-wordStartIndex] = s[j];
-				}
-				lastType[j-wordStartIndex] = ' ';
-				lastType[j-wordStartIndex+1] = '\0';
-			}
-			wordCount = 0;
-			i++;
-			while(s[i] == ' ' || s[i] == '\t') i++;
-			wordStartIndex = i;
-		}
-	}
-}
-
 void getStructName(char * line, char * buffer){
 	int spc = 0;
 	int i, j;

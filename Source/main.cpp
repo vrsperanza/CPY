@@ -192,8 +192,7 @@ int main(int argc, char ** argv){
 		bool wroteCppFile = false;
 		if(!fileExist(cppFile)){
 			if(fileExist(cpyFile)){
-				replaceRawIncludes(cpyFile);
-				replaceQuickPrints(cpyFile);
+				firstReplaces(cpyFile);
 				generateSource(cpyFile, cppFile, beauty);
 				allowedHeaders.insert(fileName);
 			}
@@ -203,8 +202,7 @@ int main(int argc, char ** argv){
 			if(fileExist(cpyFile)){
 				if(fileModifiedTime(cppFile) < fileModifiedTime(cpyFile)){
 					remove(cppFile);
-					replaceRawIncludes(cpyFile);
-					replaceQuickPrints(cpyFile);
+					firstReplaces(cpyFile);
 					generateSource(cpyFile, cppFile, beauty);
 					allowedHeaders.insert(fileName);
 				}
