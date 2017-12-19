@@ -64,7 +64,7 @@ bool interrogationPrintParse(char * line){
 	if((i == -1 || line[i] == '\n') && pos != -1){
 		i = pos;
 		line[i] = ' ';
-		stringInsert(line, "std::cout", i);
+		stringInsert(line, "std::cerr", i);
 		i += 10;
 		
 		bool first = true;
@@ -114,7 +114,8 @@ bool interrogationPrintParse(char * line){
 }
 
 bool coutPrintParse(char * line){
-	int pos = string_isSubstring(line, "cout");
+	int pos = max(	string_isSubstring(line, "cout"),
+					string_isSubstring(line, "cerr"));
 	if(line[pos+4] != ' ' && line[pos+4] != '\t')
 		return false;
 	if(pos > 0 && line[pos-1] != ' ' && line[pos-1] != '\t' && line[pos-1] != ':')
