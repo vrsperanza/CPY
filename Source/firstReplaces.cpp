@@ -13,6 +13,34 @@ using namespace std;
 
 #include <iostream>
 
+void treatLineEndings(const char * filename){
+	FILE * input = fopen(filename, "r");
+	if(input == NULL)
+		return;
+	
+	FILE * output = fopen(tempFile, "w+");
+	char line[LINESZ];
+	while (fgets (line, LINESZ, input)) {
+		int resultPos = 0;
+		int pos = 0;
+		while(line[pos] != '\0'){
+			if(line[pos] == '\r'){
+				line[resultPos++] = '\n';
+				pos += 1 + (line[pos+1] == '\n');
+			}
+			else
+				line[resultPos++] = line[pos++];
+		}
+		
+		fprintf(output, "%s", line);
+	}
+	fclose(input);
+	fclose(output);
+	remove(filename);
+	rename(tempFile, filename);
+	return;
+}
+
 bool exclamationPrintParse(char * line){
 	int pos = string_isSubstring(line, "!");
 	int i = pos;
@@ -210,6 +238,13 @@ void replaceQuickPrints(const char * filename){
 	char line[LINESZ];
 	while (fgets (line, LINESZ, input)) {
 		
+		int pos = strlen(line)-1;
+		while(pos >= 0 && stringContainsChar(" \t\n", line[pos])) pos--;
+		if(pos != -1 && line[pos] == ';'){
+			line[pos] = '\n';
+			line[pos+1] = '\0';
+		}
+		
 		//Must be in this order, interrogation and exclamation are parsed to semi-cout, which is in turn resolved by cout
 		exclamationPrintParse(line);
 		interrogationPrintParse(line);
@@ -240,27 +275,27 @@ bool replaceRawIncludesInner(const char * filename){
 			
 			//Keep whatever is after #raw "file.ext"
 			//Eg:
-			//#raw "template.cpy" //AutoTag
+			//#raw "template.cpy" //Some comment
 			int aspCnt = 0;
 			int i = 0;
-			while(aspCnt < 2 && line[i] != '\0'){
-				if(line[i] == '\"')
-					aspCnt++;
-				i++;
-			}
-			while(line[i] != '\0'){
-				fprintf(output, "%c", line[i]);
-				i++;
-			}
+			while(aspCnt < 2 && line[i] != '\0')
+				if(line[i++] == '\"')
+					aspCnt++;			
+			if(line[i] != '\n')
+				while(line[i] != '\0')
+					fprintf(output, "%c", line[i++]);
 			
 			//Copies include content to current file
 			if(fileExist(includeName.c_str())){
+				//treatLineEndings(includeName.c_str());
 				FILE * copy = fopen(includeName.c_str(), "r");
-				while (fgets (line2, LINESZ, copy)){
-					fprintf(output, "%s", line2);
+				if(copy != NULL){
+					while (fgets (line2, LINESZ, copy)){
+						fprintf(output, "%s", line2);
+					}
+					fprintf(output, "\n");
+					fclose(copy);
 				}
-				fprintf(output, "\n");
-				fclose(copy);
 			}
 			else {
 				printf("Raw include file not found: %s", includeName);
@@ -411,8 +446,9 @@ void formatSpacing(const char * filename){
 }
 
 void firstReplaces(const char * filename){
-	joinContinuedLines(filename);
+	treatLineEndings(filename);
 	replaceRawIncludes(filename);
+	joinContinuedLines(filename);
 	replaceQuickPrints(filename);
 	formatSpacing(filename);
 }
