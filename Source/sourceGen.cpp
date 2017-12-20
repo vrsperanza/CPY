@@ -44,20 +44,22 @@ void addPahrenthesis(char * s){
 			while(s[offset] != '\n')
 				offset++;
 	
-	if(string_isSubstring(s, "struct") >= 0)
+	if(string_isWord(s, "struct", wordSeparators) >= 0)
 		return;
 	
 	int len = strlen(s);
 	
 	if(s[len-2] == '{'){
 		int lookStart = max(max(max(
-			string_isSubstring(s, "if"),
-			string_isSubstring(s, "for")),
-			string_isSubstring(s, "while")),
-			string_isSubstring(s, "switch"));
+			string_isWord(s, "if", wordSeparators),
+			string_isWord(s, "for", wordSeparators)),
+			string_isWord(s, "while", wordSeparators)),
+			string_isWord(s, "switch", wordSeparators));
 		
 		if(lookStart == -1){
-			implyFunctionParametersType(s);
+			if(string_isWord(s, "do", wordSeparators) == -1 &&
+			   string_isWord(s, "else", wordSeparators) == -1)
+				implyFunctionParametersType(s);
 		}
 		else{
 			int i = lookStart;
@@ -105,12 +107,28 @@ void addPahrenthesis(char * s){
 
 void implyFunctionParametersType(char * s){	
 	char lastType[LINESZ] = "\0";
-	int wordCount = 0;
 	
 	int typeStartIndex = 0;
 	
-	int i;
-	for(i = 0; s[i] != '(' && s[i] != '\0'; i++);
+	int i = 0;
+	while(s[i] == ' ' || s[i] == '\t') i++;
+	
+	int wordCount = 0;
+	while(s[i] != '(' && s[i] != '\0'){
+		if(s[i] == ' ' || s[i] == '\t'){
+			wordCount++;
+			while(s[i] == ' ' || s[i] == '\t') i++;
+			i--;
+		}
+		i++;
+	}
+	
+	if(wordCount == 0){
+		if(string_isWord(s, "main", wordSeparators) != -1)
+			stringInsert(s, "int ", 0);
+		else
+			stringInsert(s, "auto ", 0);
+	}	
 	
 	if(s[i] == '(') i++;
 	
@@ -120,6 +138,7 @@ void implyFunctionParametersType(char * s){
 	int wordEndIndex = i;
 	int lastWordEndIndex = i;
 	
+	wordCount = 0;
 	while(s[i] != '\0' && s[i] != '\n'){
 		wordCount++;
 		while(s[i] != ' ' && s[i] != '\t' && s[i] != '\0' && s[i] != '\n' &&  s[i] != ',' &&  s[i] != '(' &&  s[i] != '=') i++;
@@ -242,6 +261,7 @@ int closeKeys(int offset, bool beauty){
 		offSets.pop();				
 		int retOffset = offSets.top();
 		
+		buffPreviousLen = strlen(buffPrevious);
 		if(buffPrevious[buffPreviousLen-1] == '\n'){
 			if(beauty){
 				for(i = 0; i < retOffset/tabSpaces; i++)
@@ -292,6 +312,20 @@ int closeKeys(int offset, bool beauty){
 	return closeAmount;
 }
 
+int placeLineEnding(char * line){
+	int len = strlen(line);
+	
+	int last = len-1;
+	while(last >= 0 && stringContainsChar(" \t\n", line[last])) last--;
+	
+	if(last != -1 && line[last] != ';'){
+		line[++last] = ';';
+		line[++last] = '\n';
+		line[++last] = '\0';
+	}
+	return last;
+}
+
 void generateSource(char * inputFile, char * outputFile, bool beauty){
 	input = fopen(inputFile, "r");
 	output = fopen(outputFile, "w+");
@@ -313,19 +347,25 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 	
 	strcpy(buffPrevious, "");
 	
+	char emptyLinesBuffPrevious[LINESZ] = "";
+	char emptyLinesBuff[LINESZ] = "";
+	
 	while (fgets (buff, LINESZ, input)) {
 		//Skip empty lines
+		emptyLinesBuff[0] = '\0';
 		bool empty = isEmptyLine(buff);
+		if(empty)
+			strcpy(emptyLinesBuff, buff);
+		
 		while(empty){
 			if(!fgets (buff2, LINESZ, input))
 				break;
-			if(buff[buffLen-2] == '\\'){
-				buff[buffLen-2] = '\n';
-				buff[buffLen-1] = '\0';
-			}
+			
 			empty = isEmptyLine(buff2);
-			strcat(buff, buff2);
-			buffLen = strlen(buff);
+			if(empty)
+				strcat(emptyLinesBuff, buff2);
+			else
+				strcpy(buff, buff2);
 		}
 		
 		//Read tab spaces
@@ -354,6 +394,7 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 		if(buff[i] == '#')
 			cPreCompilerTag = true;
 		else{
+			buffLen = strlen(buff);
 			for(; i < buffLen-1; i++){
 				if(buff[i] == '/'){
 					if(buff[i+1] == '/')
@@ -372,18 +413,7 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 		
 		int outScopeAmount = 0;
 		if(!multiLineComment && !multiLineCommentEnd && !cPreCompilerTag && !oneLineComment){
-			if(buff[i-1] != ';' && buff[i-1] != '/' && buff[i-1] != '\\'){
-				if(buff[i] == '\n'){
-					buff[i] = ';';
-					buff[i+1] = '\n';
-					buff[i+2] = '\0';
-				}
-				else {
-					buff[i+1] = ';';
-					buff[i+2] = '\0';
-				}
-				buffLen = strlen(buff);
-			}
+			buffLen = placeLineEnding(buff);
 			
 			if(offset > offSets.top()){
 				seenWords.push_back(unordered_set<string>());
@@ -410,12 +440,13 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 		implyVariablesType(buffPrevious);
 		while(outScopeAmount--)
 			seenWords.pop_back();
-		fprintf(output, "%s", buffPrevious);
+		fputs(emptyLinesBuffPrevious, output);
+		fputs(buffPrevious, output);
 		
-		for(i = 0; buff[i] != '\0'; i++)
-			buffPrevious[i] = buff[i];
-		buffPrevious[i] = '\0';
-		buffPreviousLen = i;
+		strcpy(buffPrevious, buff);
+		strcpy(emptyLinesBuffPrevious, emptyLinesBuff);
+		
+		buffPreviousLen = buffLen;
     }
 	
 	int outScopeAmount = closeKeys(0, beauty);
@@ -423,7 +454,8 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 	implyVariablesType(buffPrevious);
 	while(outScopeAmount--)
 		seenWords.pop_back();
-	fprintf(output, "%s", buffPrevious);
+	fputs(emptyLinesBuffPrevious, output);
+	fputs(buffPrevious, output);
 	fclose(input);
 	fclose(output);
 }

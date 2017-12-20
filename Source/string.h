@@ -14,5 +14,6 @@ bool isEmptyLine(char * line);
 bool structHasTypedef(char * line);
 bool stringContainsChar(string s, char check);
 void stringToLower(char * s);
+int string_isWord(char* mainStr, string subStr, string separators);
 
 #endif

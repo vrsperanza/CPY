@@ -4,6 +4,13 @@ using namespace std;
 
 #include "defines.h"
 
+bool stringContainsChar(string s, char check){
+	for(char c : s)
+		if(c == check)
+			return true;
+	return false;
+}
+
 char strsub(char * a, char * b, int as){
 	int bs = 0;
 	while(a[as] != '\0' && b[bs] != '\0'){
@@ -21,6 +28,22 @@ int string_isSubstring(char* mainStr, string subStr){
             if(subStr[aux1+1] == '\0') return aux;
             if(mainStr[aux+aux1+1] == '\0') return -1;
         }
+    }
+    return -1;
+}
+
+int string_isWord(char* mainStr, string subStr, string separators){
+    int aux;
+    for(aux = 0; mainStr[aux] != '\0'; aux++){
+		if(aux-1 == -1 || stringContainsChar(separators, mainStr[aux-1])){
+			int aux1;
+			for(aux1 = 0; subStr[aux1] == mainStr[aux+aux1]; aux1++){
+				if(subStr[aux1+1] == '\0')
+					if(mainStr[aux+aux1+1] == '\0' || stringContainsChar(separators, mainStr[aux+aux1+1]))
+						return aux;
+				if(mainStr[aux+aux1+1] == '\0') return -1;
+			}
+		}
     }
     return -1;
 }
@@ -87,13 +110,6 @@ bool isEmptyLine(char * line){
 bool structHasTypedef(char * line){
 	if(string_isSubstring(line, "typedef") >= 0)
 		return true;
-	return false;
-}
-
-bool stringContainsChar(string s, char check){
-	for(char c : s)
-		if(c == check)
-			return true;
 	return false;
 }
 
