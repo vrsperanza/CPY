@@ -314,8 +314,6 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 	strcpy(buffPrevious, "");
 	
 	while (fgets (buff, LINESZ, input)) {
-		
-		
 		//Skip empty lines
 		bool empty = isEmptyLine(buff);
 		while(empty){

@@ -10,14 +10,14 @@ int * genArray(int size, maxVal)
 
 int findBiggest(int * arr, int size)
 	int biggest = arr[0]
-	for(int i = 0; i < size; i++)
-		if(arr[i] > biggest)
+	for int i = 0; i < size; i++
+		if arr[i] > biggest
 			biggest = arr[i]
 	return biggest
 
 int findSmallest(int * arr, int size)
 	int smallest = arr[0]
-	for(int i = 0; i < size; i++)
+	for int i = 0; i < size; i++
 		if(arr[i] < smallest)
 			smallest = arr[i]
 	return smallest

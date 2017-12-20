@@ -2,6 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stack>
 
 #include "defines.h"
 #include "extensionHandler.h"
@@ -393,8 +394,13 @@ void implyWordSeparationSpaces(char * line){
 			else
 				last = '\0';
 			
-			bool isOperator = !stringContainsChar("+-*/%=<>&^|!?,;.({[", last) && last != '\0';
+			k = j;
+			while((line[k] == ' ' || line[k] == '\t' || line[k] == '\n') && line[k] != '\0')
+				k++;
+			next = line[k];
 			
+			bool isOperator = !stringContainsChar("+-*/%=<>&^|!?,;.([{", last) && last != '\0' &&
+							  !stringContainsChar(")]};,.", next) && next != '\0';
 			
 			if(	isOperator && 
 				(line[i] != '/' || line[i+1] != '/') &&
@@ -445,10 +451,44 @@ void formatSpacing(const char * filename){
 	return;
 }
 
+void treatCurlyBrackets(const char * filename){
+	FILE * input = fopen(filename, "r");
+	if(input == NULL)
+		return;
+	
+	FILE * output = fopen(tempFile, "w+");
+	char line[LINESZ];
+	while (fgets (line, LINESZ, input)) {
+		stack<int> open;
+		for(int i = 0; line[i] != '\0'; i++){
+			if(line[i] == '{')
+				open.push(i);
+			else if(line[i] == '}')
+				if(open.empty())
+					line[i] = ' ';
+				else
+					open.pop();
+		}
+		
+		while(!open.empty()){
+			line[open.top()] = ' ';
+			open.pop();
+		}
+		
+		fprintf(output, "%s", line);
+	}
+	fclose(input);
+	fclose(output);
+	remove(filename);
+	rename(tempFile, filename);
+	return;
+}
+
 void firstReplaces(const char * filename){
 	treatLineEndings(filename);
 	replaceRawIncludes(filename);
 	joinContinuedLines(filename);
+	treatCurlyBrackets(filename);
 	replaceQuickPrints(filename);
 	formatSpacing(filename);
 }
