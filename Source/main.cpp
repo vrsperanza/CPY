@@ -60,6 +60,12 @@ void smartCompilation(map<string, vector<string> > dependenceMap, string mainFil
 		
 		
 		string cppSource = fileName + ".cpp";
+		
+		if(!fileExist(cppSource.c_str()))	
+			continue;
+		
+		generatedObjects.insert(fileName);
+		
 		string targetObject = fileName + ".o";
 		
 		if(fileModifiedTime(targetObject.c_str()) < fileModifiedTime(cppSource.c_str())){
@@ -79,7 +85,6 @@ void smartCompilation(map<string, vector<string> > dependenceMap, string mainFil
 		if(dependenceMap.count(fileName)){
 			for(string dependence : dependenceMap[fileName]){
 				if(!generatedObjects.count(dependence)){
-					generatedObjects.insert(dependence);
 					toProcess.push(dependence);
 				}
 			}
@@ -199,8 +204,6 @@ int main(int argc, char ** argv){
 				generateSource(cpyFile, cppFile, beauty);
 				allowedHeaders.insert(fileName);
 			}
-			else
-				printf("Required file: %s not found\n", cpyFile);
 		} else {
 			if(fileExist(cpyFile)){
 				if(fileModifiedTime(cppFile) < fileModifiedTime(cpyFile)){

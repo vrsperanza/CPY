@@ -24,9 +24,8 @@ findBiggestSmallest(int * arr, int size)
 	
 main()
 	srand(time(NULL))
-	! "Input array size and max value"
 	int size, maxVal
-	cin size maxVal
+	? "Input array size and max value" size maxVal
 	
 	arr = genArray(size, maxVal)
 	
