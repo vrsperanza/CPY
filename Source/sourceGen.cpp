@@ -24,6 +24,7 @@ FILE * output;
 int i, j;
 
 stack<int> offSets;
+stack<bool> closeWithLineEnding;
 bool multiLineComment;
 char buff[LINESZ];
 char buff2[LINESZ];
@@ -32,7 +33,6 @@ int buffLen;
 char buffPrevious[LINESZ];
 int buffPreviousLen;
 
-bool inStruct;
 bool structTypedef;
 char structName[LINESZ];
 vector<unordered_set<string> > seenWords;
@@ -213,6 +213,8 @@ int closeKeys(int offset, bool beauty){
 	int closeAmount = 0;
 	while(offset < offSets.top()){
 		closeAmount++;
+		bool closeLineEnding = closeWithLineEnding.top();
+		closeWithLineEnding.pop();
 		offSets.pop();				
 		int retOffset = offSets.top();
 		
@@ -249,8 +251,7 @@ int closeKeys(int offset, bool beauty){
 			}
 		}
 		
-		if(inStruct){
-			inStruct = false;
+		if(closeLineEnding){
 			if(structTypedef){
 				structTypedef = false;
 				i = 0;
@@ -296,13 +297,13 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 		exit(0);
 	}
 	offSets.push(0);
+	closeWithLineEnding.push(false);
 	
 	seenWords.clear();
 	seenWords.push_back(unordered_set<string>());
 	
 	multiLineComment = false;
 	
-	inStruct = false;
 	structTypedef = false;
 	
 	strcpy(buffPrevious, "");
@@ -379,15 +380,21 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 				seenWords.push_back(unordered_set<string>());
 				
 				offSets.push(offset);
+				closeWithLineEnding.push(false);
 				
-				if(string_isSubstring(buffPrevious, "struct") >= 0){
-					inStruct = true;
-					if(string_isSubstring(buffPrevious, "typedef") >= 0){
+				if(string_isWord(buffPrevious, "struct") >= 0){
+					closeWithLineEnding.top() = true;
+					if(string_isWord(buffPrevious, "typedef") >= 0){
 						structTypedef = true;
 						getStructName(buffPrevious, structName);
 					}
 					else structTypedef = false;
 				}
+				
+				if(string_isWord(buffPrevious, "class") >= 0){
+					closeWithLineEnding.top() = true;
+				}
+				
 				if(buffPrevious[buffPreviousLen-1] == '\n')
 					buffPrevious[buffPreviousLen-2] = '{';
 				else 
