@@ -4,11 +4,25 @@ using namespace std;
 
 #include "defines.h"
 
+
+
 bool stringContainsChar(string s, char check){
 	for(char c : s)
 		if(c == check)
 			return true;
 	return false;
+}
+
+bool stringContainsChar(string s1, string s2){
+	const std::string validChars = "AaBbCcDd";
+	for(char c : s1)
+		if(s2.find_first_of(c) != string::npos)
+			return true;
+	return false;
+}
+
+bool isWhitespace(string s, string ignore=whiteSpace){
+	return stringContainsChar(ignore, s);
 }
 
 string removeTrailingWhitespace(string s, string whitespace=" \t\n"){

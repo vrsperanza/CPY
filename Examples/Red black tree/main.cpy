@@ -1,7 +1,6 @@
 #include "rntree.h"
 
 int main()
-
 	//scanf("%*[^\n]")
 	
 	int o, x;
@@ -50,6 +49,6 @@ int main()
 			//printf("treeCostlyPrint %d\n", x)
 			treeCostlyPrint(*root)
 			printf("\n")
-		//else
-		//	printf("%d is not a valid option\n", o)
+		else
+			printf("%d is not a valid option\n", o)
 	tree_free(root)

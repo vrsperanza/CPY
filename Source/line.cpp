@@ -50,7 +50,7 @@ int closePosition(char * line, int startPos, char open, char close){
 	return -1;
 }
 
-vector<string> smartSplitWords(char * line, string firstWordRequired="", string separators=wordSeparators){
+vector<string> smartSplitWords(char * line, string firstWordRequired="", string separators=wordSeparators, bool keepSplits=false){
 	vector<string> words;
 	int pos = 0;
 	string word;
@@ -58,11 +58,19 @@ vector<string> smartSplitWords(char * line, string firstWordRequired="", string 
 	bool firstWordRequiredDone = (firstWordRequired == "");
 	
 	while(line[pos] != '\0'){
-		while(stringContainsChar(separators, line[pos])) pos++;
+		word = "";
+		if(keepSplits){
+			while(stringContainsChar(separators, line[pos]))
+				word += line[pos++];
+			words.push_back(word);
+		} else {
+			while(stringContainsChar(separators, line[pos])) pos++;
+		}
 		
-		string word = "";
+		word = "";
 		while(line[pos] != '\0' && !stringContainsChar(separators, line[pos])){
 			int pos2 = pos;
+			
 			if(line[pos] == '(')
 				pos2 = closePosition(line, pos, '(', ')');
 			else if(line[pos] == '[')
@@ -77,53 +85,14 @@ vector<string> smartSplitWords(char * line, string firstWordRequired="", string 
 		}
 		
 		if(!firstWordRequiredDone && firstWordRequired != word)
-			return words;
+			return vector<string>();
 		else
 			firstWordRequiredDone = true;
 		
-		words.push_back(word);
-	}
-	
-	return words;
-}
-
-vector<string> smartSplitWordsKeepSplits(char * line, string firstWordRequired="", string separators=wordSeparators){
-	vector<string> words;
-	int pos = 0;
-	string word;
-	
-	bool firstWordRequiredDone = (firstWordRequired == "");
-	
-	while(line[pos] != '\0'){
-		word = "";
-		while(stringContainsChar(separators, line[pos])){ 
-			word += line[pos++];
-		}
-		
-		words.push_back(word);
-		
-		word = "";
-		while(line[pos] != '\0' && !stringContainsChar(separators, line[pos])){
-			int pos2 = pos;
-			if(line[pos] == '(')
-				pos2 = closePosition(line, pos, '(', ')');
-			else if(line[pos] == '[')
-				pos2 = closePosition(line, pos, '[', ']');
-			else if(line[pos] == '{')
-				pos2 = closePosition(line, pos, '{', '}');
-			else if(line[pos] == '\"')
-				pos2 = stringClosePosition(line, pos);
-			
-			while(pos <= pos2)
-				word += line[pos++];
-		}
-		
-		if(!firstWordRequiredDone && firstWordRequired != word)
-			return words;
+		if(word != "")
+			words.push_back(word);
 		else
-			firstWordRequiredDone = true;
-		
-		words.push_back(word);
+			break;
 	}
 	return words;
 }

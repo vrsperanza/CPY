@@ -5,6 +5,7 @@
 #include "defines.h"
 using namespace std;
 
+bool isWhitespace(string s, string ignore=whiteSpace);
 string removeTrailingWhitespace(string s, string whitespace=" \t\n");
 char strsub(char * a, char * b, int as);
 int string_isSubstring(char* mainStr, string subStr);

@@ -43,104 +43,89 @@ void treatLineEndings(const char * filename){
 	return;
 }
 
-bool exclamationPrintParse(char * line){
-	int pos = string_isSubstring(line, "!");
-	int i = pos;
-	i--;
-	while(stringContainsChar(" \t", line[i]) && i >= 0) i--;
-	
-	if((i == -1 || line[i] == '\n') && pos != -1){		
-		int i = pos;
-		line[i] = ' ';
-		stringInsert(line, "std::cout", i);
-		i += 10;
-		while(stringContainsChar(" \t\n", line[i]) && line[i] != '\0')
-			i++;
-		
-		while(line[i] != '\n' && line[i] != '\0'){
-			
-			if(line[i] == '\"' && line[i-1] != '\\'){
-				i++;
-				while(!(line[i] == '\"' && line[i-1] != '\\') && line[i] != '\0') i++;
-			}
-			
-			while(!stringContainsChar(" \t\n", line[i]) && line[i] != '\0') i++;
-			
-			int insertPos = i;
-			
-			while(stringContainsChar(" \t\n", line[i]) && line[i] != '\0') i++;
-			
-			
-			if(line[i] != '\n' && line[i] != '\0'){
-				stringInsert(line, " \" \"", insertPos);
-				i += 4;
-			}
+void exclamationPrintParse(char * line){
+	vector<string> words = smartSplitWords(line, "!", " \t\n,;", true);
+	if(words.size() > 0){		
+		string s = words[0] + "std::cout";
+		bool first = true;
+		for(int i = 3; i < words.size(); i += 2){
+			if(!first)
+				s += " << \" \"";
+			first = false;
+			s += " << " + words[i];
 		}
-		
-		if(line[i-1] == '\n')
-			i--;
-		stringInsert(line, " std::endl", i);
-		return true;
+		s += " << std::endl\n";
+		strcpy(line, s.c_str());
+		return;
 	}
-	else return false;
+	
+	words = smartSplitWords(line, "!!", " \t\n,;", true);
+	if(words.size() > 0){
+		string s = words[0] + "std::cout";
+		bool first = true;
+		for(int i = 3; i < words.size(); i += 2){
+			if(!first)
+				s += " << \" \"";
+			first = false;
+			s += " << " + words[i];
+		}
+		s += '\n';
+		strcpy(line, s.c_str());
+		return;
+	}
 }
 
-bool interrogationPrintParse(char * line){
-	int pos = string_isSubstring(line, "?");
-	int i = pos;
-	i--;
-	while(stringContainsChar(" \t", line[i]) && i >= 0) i--;
-	
-	if((i == -1 || line[i] == '\n') && pos != -1){
-		i = pos;
-		line[i] = ' ';
-		stringInsert(line, "std::cerr", i);
-		i += 10;
-		
-		bool first = true;
-		while(line[i] != '\n' && line[i] != '\0'){
-			while(stringContainsChar(" \t", line[i]) && line[i] != '\0') i++;
-			if(line[i] == '\n')
-				break;
-			
-			string toClone = "";
-			int insertPos = i;
-			while(!stringContainsChar(" \t\n", line[i]) && line[i] != '\0'){
-			
-				if(line[i] == '\"' && line[i-1] != '\\'){
-					i++;
-					while(!(line[i] == '\"' && line[i-1] != '\\') && line[i] != '\0') {
-						toClone += line[i];
-						i++;
-					}
-					if(line[i] == '\"')
-						i++;
-				} else {
-					toClone += line[i];
-					i++;
-				}
+void interrogationPrintParse(char * line){
+	vector<string> words = smartSplitWords(line, "?", " \t\n,;", true);
+	if(words.size() > 0){
+		string s = words[0];
+		char last = 'x';
+		for(int i = 3; i < words.size(); i += 2){
+			if(words[i][0] == '\"'){
+				if(last == 'o')
+					s += " << " + words[i];
+				else if(last == 'x')
+					s += "std::cout << " + words[i];
+				else
+					if(beauty)
+						s += "\n" + words[0] + "std::cout << " + words[i];
+					else
+						s += "; std::cout << " + words[i];
+				last = 'o';
 			}
-			
-			toClone += " = \" ";
-			
-			if(first){
-				toClone.insert(0, "\"");
-				first = false;
+			else{
+				if(last == 'i')
+					s += " >> " + words[i];
+				else if(last == 'x')
+					s += "std::cin >> " + words[i];
+				else
+					if(beauty)
+						s += "\n" + words[0] + "std::cin >> " + words[i];
+					else
+						s += "; std::cin >> " + words[i];
+				last = 'i';
 			}
-			else
-				toClone.insert(0, "\" | ");
-			
-			stringInsert(line, toClone, insertPos);
-			i += toClone.size();
 		}
-		
-		while(line[i] != '\n' && line[i] != '\0')
-			i++;
-		
-		stringInsert(line, " std::endl", i);
-		return true;
+		s += '\n';
+		strcpy(line, s.c_str());
+		return;
 	}
-	else return false;
+	
+	words = smartSplitWords(line, "??", " \t\n,;", true);
+	if(words.size() > 0){
+		string s = words[0] + "std::cout";
+		bool first = true;
+		for(int i = 3; i < words.size(); i += 2){
+			if(first){
+				s += " << \"" + words[i] + " = \" << " + words[i];
+				first = false;
+			} else
+				s += " << \" | " + words[i] + " = \" << " + words[i];
+		}
+		s += '\n';
+		strcpy(line, s.c_str());
+		return;
+	}
 }
 
 bool coutPrintParse(char * line){
@@ -247,7 +232,6 @@ void replaceQuickPrints(const char * filename){
 			line[pos+1] = '\0';
 		}
 		
-		//Must be in this order, interrogation and exclamation are parsed to semi-cout, which is in turn resolved by cout
 		exclamationPrintParse(line);
 		interrogationPrintParse(line);
 		coutPrintParse(line);

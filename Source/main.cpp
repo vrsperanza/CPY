@@ -22,6 +22,13 @@
 
 using namespace std;
 
+bool beauty = false;
+bool run = false;
+bool compile = true;
+bool silent = false;
+bool exportProject = false;
+bool cleanCompilation = false;
+
 void printHelp(){
 	printf("USAGE: cpy SourceCode Flags\n");
 	printf("Flags:\n");
@@ -97,13 +104,6 @@ void smartCompilation(map<string, vector<string> > dependenceMap, string mainFil
 }
 
 int main(int argc, char ** argv){
-	bool beauty = false;
-	bool run = false;
-	bool compile = true;
-	bool silent = false;
-	bool exportProject = false;
-	bool cleanCompilation = false;
-	
 	int i, j;
 	
 	char target[LINESZ] = "a";

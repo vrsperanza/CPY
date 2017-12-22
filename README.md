@@ -84,23 +84,20 @@ Can imply ">>" and "<<" on cin and cout, switch, for and while:
 	cout a b endl
 ```
 
-Two new print functions:
+Four new print functions:
 ```
 	! arg1 arg2 arg3
 	//! prints a new line, with each argument separated by spaces
 	
-	? arg1 arg2 arg3
-	//? is meant for debugging, prints a new debug line in the format:
-	//arg1 = ContentOfArg1 | arg2 = ContentOfArg2 | arg3 = ContentOfArg3
+	!! arg1 arg2 arg3
+	//!! prints each argument separated by spaces
 	
-	//Example:
-	a = 10
-	b = a + 5
-	! a b
-	? a b
-	//Generates the output:
-	10 15
-	a = 10 | b = 15
+	? "prompt" variable variable "prompt" variable 
+	//? Reads input given inside variables using cin and prints given strings using cout
+	
+	?? arg1 arg2 arg3
+	//?? is meant for debugging, prints a new debug line in the format:
+	//arg1 = ContentOfArg1 | arg2 = ContentOfArg2 | arg3 = ContentOfArg3
 ```
 
 New precompilation tag: #raw "file"

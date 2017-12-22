@@ -35,7 +35,7 @@ int buffPreviousLen;
 bool inStruct;
 bool structTypedef;
 char structName[LINESZ];
-std::vector<std::unordered_set<std::string> > seenWords;
+vector<unordered_set<string> > seenWords;
 
 void addPahrenthesis(char * s){	
 	int offset = 0;
@@ -173,88 +173,43 @@ void implyFunctionParametersType(char * s){
 	}
 }
 
+bool wordSeen(string word){
+	for(unordered_set<string> set : seenWords)
+		if(set.count(word))
+			return true;
+	return false;
+}
+
 void implyVariablesType(char * line){
-	vector<string> words;
-	string word = "";
-	
-	vector<int> autoInsertPositions;
-	int wordStartIndex = 0;
-	int lastWordStartIndex = 0;
-	
-	int lineSize = strlen(line);
-	bool wordIsArray = false;
-	for(int i = 0; i < lineSize; i++){
-		if(stringContainsChar("[])*->.", line[i])){
-			while(!stringContainsChar(" \t\n,;(){}", line[i]))
-				i++;
-			
-			word = "";
-		}
-		
-		if(line[i] == '/'){
-			if(line[i+1] == '/'){
-				i += 2;
-				while(line[i-1] != '\n' && line[i] != '\0')
-					i++;
-			}
-			if(line[i+1] == '*'){
-				i += 2;
-				while(line[i] != '\0' || (line[i-2] != '*' && line[i-1] != '/'))
-					i++;
-			}
-		}
-		
-		
-		
-		if(line[i] == '\0')
-			break;
-		
-		if(stringContainsChar(" \t\n,;(){}", line[i])){
-			while(stringContainsChar(" \t\n,;(){}", line[i]))
-				i++;
-			
-			//If only one word exists before equality and it hasn't been seen, imply type
-			if(word == "="){
-				bool wordSeen = false;
-				for(unordered_set<string> wordsLayer : seenWords){
-					if(wordsLayer.count(words.back())){
-						wordSeen = true;
-						break;
-					}
-				}
-				
-				if(!wordSeen){
-					//No need to code type implication again since g++ does it once it sees the variable's type is "auto"
-					//Inserts "auto" before variable name after reading all words
-					
-					int j = lastWordStartIndex-1;
-					while((line[j] == ' ' || line[j] == '\t') && j >= 0)
-						j--;
-					
-					//if last character before current word is a sequence ender, imply variable type
-					if(j == -1 || stringContainsChar("\n,;(){}", line[j]))  
-						autoInsertPositions.push_back(lastWordStartIndex);
-				}
-			}
-			
-			words.push_back(word);
-			lastWordStartIndex = wordStartIndex;
-			wordStartIndex = i;
-			i--;
-			word = "";
-		}
-		else {
-			word += line[i];
-		}
+	vector<string> firstSplit = smartSplitWords(line, "", " \t\r\n()[]{},.;!@#%^&*-+/:\'\\", true);
+	vector<vector<string> > wordGroups;
+	wordGroups.push_back(vector<string>());
+	for(int i = 1; i < firstSplit.size(); i += 2){
+		if(!isWhitespace(firstSplit[i-1], " <>[]-"))
+			wordGroups.push_back(vector<string>());
+		wordGroups.back().push_back(firstSplit[i]);
 	}
 	
-	for(int i = autoInsertPositions.size()-1; i >= 0; i--)
-		stringInsert(line, "auto ", autoInsertPositions[i]);
+	cout << "LINE: " << line;
+	line[0] = '\0';
 	
-	//Add new words to seen to avoid duplicate declaration
-	words = smartSplitWords(line, "", " \t\n,;()[]{}");
-	for(string word : words)
-		seenWords.back().insert(word);
+	int whiteSpaceID = 0;
+	for(vector<string> words : wordGroups){
+		cout << "GROUP:\n";
+		
+		if(words.size() >= 3 && words[1] == "=" && !wordSeen(words[0]))
+			words[0] = "auto " + words[0];
+		
+		for(string word : words){
+			cout << "\t" << word << endl;
+			strcat(line, firstSplit[whiteSpaceID].c_str());
+			strcat(line, word.c_str());
+			seenWords.back().insert(word);
+			whiteSpaceID += 2;
+		}
+	}
+	if(whiteSpaceID < firstSplit.size())
+		strcat(line, firstSplit[whiteSpaceID].c_str());
 }
 
 int closeKeys(int offset, bool beauty){
