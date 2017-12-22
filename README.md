@@ -8,6 +8,7 @@ CPY is a (Pre)Compiler of .cpy files, those are basically C++ withought redundan
 	Curly brackets are implied from identation
 	Semicolons are implied from line breaks (lines must be marked to continue, not to break)
 	Headers are interpreted from the sources and includes
+	Can return multiple values from functions
 	While still being strongly typed (and just as fast as C++, for it is just a pre-compiler)
 		variable types can be implied from equity or manually specified.
 	Sequenced style declarations have also been generalised to functions:
@@ -31,6 +32,26 @@ Implies variable types from assignment:
 a = 10
 b = a
 //Declares a and b as integers
+```
+
+Can return multiple values from functions:
+```
+operations(int a, b)
+	sum = a + b
+	subtract = a - b
+	multiply = a * b
+	divide = a / b
+	return sum, subtract, multiply, divide
+	
+main()
+	sum, _, mult = sumSubtract(20, 10)
+	! sum mult
+
+//Produces the output:
+30 10
+
+//_ variables mean ignore this return value
+//The last variables can be omitted if not necessary
 ```
 
 Implies function argument types based on previous:

@@ -11,6 +11,15 @@ bool stringContainsChar(string s, char check){
 	return false;
 }
 
+string removeTrailingWhitespace(string s, string whitespace=" \t\n"){
+	int i = 0;
+	while(stringContainsChar(whitespace, s[i])) i++;
+	
+	int j = s.size()-1;
+	while(stringContainsChar(whitespace, s[j])) j--;
+	return s.substr(i, j-i+1);
+}
+
 char strsub(char * a, char * b, int as){
 	int bs = 0;
 	while(a[as] != '\0' && b[bs] != '\0'){
@@ -32,7 +41,7 @@ int string_isSubstring(char* mainStr, string subStr){
     return -1;
 }
 
-int string_isWord(char* mainStr, string subStr, string separators){
+int string_isWord(char* mainStr, string subStr, string separators=wordSeparators){
     int aux;
     for(aux = 0; mainStr[aux] != '\0'; aux++){
 		if(aux-1 == -1 || stringContainsChar(separators, mainStr[aux-1])){

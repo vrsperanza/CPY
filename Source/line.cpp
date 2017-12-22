@@ -1,11 +1,140 @@
+#include <iostream>
 #include <string>
 #include <string.h>
 #include <vector>
 #include <unordered_set>
 #include "string.h"
+#include "defines.h"
 using namespace std;
 
-#include "defines.h"
+vector<string> splitWords(char * line, string firstWordRequired="", string separators=wordSeparators){
+	vector<string> words;
+	int pos = 0;
+	if(line[pos] != '\0'){
+		string word;
+		while(stringContainsChar(separators, line[pos])) pos++;
+		while(line[pos] != '\0' && !stringContainsChar(separators, line[pos])) word += line[pos++];
+		
+		if(firstWordRequired != "" && word != firstWordRequired)
+			return words;
+		
+		words.push_back(word);
+	}
+	
+	while(line[pos] != '\0'){
+		string word;
+		while(stringContainsChar(separators, line[pos])) pos++;
+		while(line[pos] != '\0' && !stringContainsChar(separators, line[pos])) word += line[pos++];
+		words.push_back(word);
+	}
+	return words;
+}
+
+int stringClosePosition(char * line, int startPos){
+	for(int i = startPos+1; line[i] != '\0'; i++)
+		if(line[i] == '\"' && line[i-1] != '\\')
+			return i;
+	return -1;
+}
+
+int closePosition(char * line, int startPos, char open, char close){
+	int count = 0;
+	for(int i = startPos; line[i] != '\0'; i++){
+		if(line[i] == open)
+			count++;
+		else if(line[i] == close)
+			count--;
+		if(count == 0)
+			return i;
+	}
+	return -1;
+}
+
+vector<string> smartSplitWords(char * line, string firstWordRequired="", string separators=wordSeparators){
+	vector<string> words;
+	int pos = 0;
+	string word;
+	
+	bool firstWordRequiredDone = (firstWordRequired == "");
+	
+	while(line[pos] != '\0'){
+		while(stringContainsChar(separators, line[pos])) pos++;
+		
+		string word = "";
+		while(line[pos] != '\0' && !stringContainsChar(separators, line[pos])){
+			int pos2 = pos;
+			if(line[pos] == '(')
+				pos2 = closePosition(line, pos, '(', ')');
+			else if(line[pos] == '[')
+				pos2 = closePosition(line, pos, '[', ']');
+			else if(line[pos] == '{')
+				pos2 = closePosition(line, pos, '{', '}');
+			else if(line[pos] == '\"')
+				pos2 = stringClosePosition(line, pos);
+			
+			while(pos <= pos2)
+				word += line[pos++];
+		}
+		
+		if(!firstWordRequiredDone && firstWordRequired != word)
+			return words;
+		else
+			firstWordRequiredDone = true;
+		
+		words.push_back(word);
+	}
+	
+	return words;
+}
+
+vector<string> smartSplitWordsKeepSplits(char * line, string firstWordRequired="", string separators=wordSeparators){
+	vector<string> words;
+	int pos = 0;
+	string word;
+	
+	bool firstWordRequiredDone = (firstWordRequired == "");
+	
+	while(line[pos] != '\0'){
+		word = "";
+		while(stringContainsChar(separators, line[pos])){ 
+			word += line[pos++];
+		}
+		
+		words.push_back(word);
+		
+		word = "";
+		while(line[pos] != '\0' && !stringContainsChar(separators, line[pos])){
+			int pos2 = pos;
+			if(line[pos] == '(')
+				pos2 = closePosition(line, pos, '(', ')');
+			else if(line[pos] == '[')
+				pos2 = closePosition(line, pos, '[', ']');
+			else if(line[pos] == '{')
+				pos2 = closePosition(line, pos, '{', '}');
+			else if(line[pos] == '\"')
+				pos2 = stringClosePosition(line, pos);
+			
+			while(pos <= pos2)
+				word += line[pos++];
+		}
+		
+		if(!firstWordRequiredDone && firstWordRequired != word)
+			return words;
+		else
+			firstWordRequiredDone = true;
+		
+		words.push_back(word);
+	}
+	return words;
+}
+
+string getFirstWord(char * line, string separators=wordSeparators){
+	string word = "";
+	int i = 0;
+	while(line[i] == ' ' || line[i] == '\t') i++;
+	while(line[i] != '\0' && !stringContainsChar(separators, line[i])) word += line[i++];
+	return word;
+}
 
 bool isExternalInclude(char * line){
 	char stringInclude[] = "#include";

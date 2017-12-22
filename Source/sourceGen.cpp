@@ -1,9 +1,9 @@
 #include <unordered_set>
 #include <vector>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <string>
 #include <stack>
 using namespace std;
@@ -44,21 +44,23 @@ void addPahrenthesis(char * s){
 			while(s[offset] != '\n')
 				offset++;
 	
-	if(string_isWord(s, "struct", wordSeparators) >= 0)
+	if(string_isWord(s, "struct") >= 0)
 		return;
 	
 	int len = strlen(s);
 	
 	if(s[len-2] == '{'){
 		int lookStart = max(max(max(
-			string_isWord(s, "if", wordSeparators),
-			string_isWord(s, "for", wordSeparators)),
-			string_isWord(s, "while", wordSeparators)),
-			string_isWord(s, "switch", wordSeparators));
+			string_isWord(s, "if"),
+			string_isWord(s, "for")),
+			string_isWord(s, "while")),
+			string_isWord(s, "switch"));
 		
 		if(lookStart == -1){
-			if(string_isWord(s, "do", wordSeparators) == -1 &&
-			   string_isWord(s, "else", wordSeparators) == -1)
+			if(string_isWord(s, "do") == -1 &&
+			   string_isWord(s, "else") == -1 &&
+			   string_isWord(s, "class") == -1 &&
+			   string_isWord(s, "struct") == -1)
 				implyFunctionParametersType(s);
 		}
 		else{
@@ -124,7 +126,7 @@ void implyFunctionParametersType(char * s){
 	}
 	
 	if(wordCount == 0){
-		if(string_isWord(s, "main", wordSeparators) != -1)
+		if(string_isWord(s, "main") != -1)
 			stringInsert(s, "int ", 0);
 		else
 			stringInsert(s, "auto ", 0);
@@ -250,6 +252,7 @@ void implyVariablesType(char * line){
 		stringInsert(line, "auto ", autoInsertPositions[i]);
 	
 	//Add new words to seen to avoid duplicate declaration
+	words = smartSplitWords(line, "", " \t\n,;()[]{}");
 	for(string word : words)
 		seenWords.back().insert(word);
 }
@@ -324,6 +327,11 @@ int placeLineEnding(char * line){
 		line[++last] = '\0';
 	}
 	return last;
+}
+
+void lineImplications(char * line){
+	addPahrenthesis(line);
+	implyVariablesType(line);
 }
 
 void generateSource(char * inputFile, char * outputFile, bool beauty){
@@ -436,8 +444,7 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 			
 			outScopeAmount = closeKeys(offset, beauty);			
 		}
-		addPahrenthesis(buffPrevious);
-		implyVariablesType(buffPrevious);
+		lineImplications(buffPrevious);
 		while(outScopeAmount--)
 			seenWords.pop_back();
 		fputs(emptyLinesBuffPrevious, output);
@@ -450,8 +457,7 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
     }
 	
 	int outScopeAmount = closeKeys(0, beauty);
-	addPahrenthesis(buffPrevious);
-	implyVariablesType(buffPrevious);
+	lineImplications(buffPrevious);
 	while(outScopeAmount--)
 		seenWords.pop_back();
 	fputs(emptyLinesBuffPrevious, output);

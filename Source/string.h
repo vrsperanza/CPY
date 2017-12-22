@@ -2,8 +2,10 @@
 #define _STRING_H_43674_
 
 #include <string>
+#include "defines.h"
 using namespace std;
 
+string removeTrailingWhitespace(string s, string whitespace=" \t\n");
 char strsub(char * a, char * b, int as);
 int string_isSubstring(char* mainStr, string subStr);
 void strInsert(char * dest, char * insert, int index);
@@ -14,6 +16,6 @@ bool isEmptyLine(char * line);
 bool structHasTypedef(char * line);
 bool stringContainsChar(string s, char check);
 void stringToLower(char * s);
-int string_isWord(char* mainStr, string subStr, string separators);
+int string_isWord(char* mainStr, string subStr, string separators=wordSeparators);
 
 #endif

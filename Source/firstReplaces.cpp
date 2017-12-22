@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stack>
+#include <vector>
 
 #include "defines.h"
 #include "extensionHandler.h"
@@ -484,6 +485,113 @@ void treatCurlyBrackets(const char * filename){
 	return;
 }
 
+void makeMultipleReturnAssignments(char * input){
+	char line[LINESZ];
+	strcpy(line, input);
+	
+	int i = 0;
+	while(line[i] != '\0' && line[i] != '=') i++;
+	if(line[i] == '\0') return;
+	
+	//Equity found
+	
+	int equityPosition = i;
+	i++;
+	
+	while(line[i] == ' ' || line[i] == '\t') i++;
+	while(line[i] != '\0' && !stringContainsChar(wordSeparators, line[i])) i++;
+	while(line[i] == ' ' || line[i] == '\t') i++;
+	
+	if(line[i] != '(') return;
+	
+	//Only one name after assignment assured
+	//( found
+	
+	while(line[i] != '\0' && line[i] != ')') i++;
+	if(line[i] == '\0') return;
+	i++;
+	
+	//) found
+	
+	while(line[i] != '\0'){
+		if(stringContainsChar(wordSeparators, line[i])) i++;
+		else if(line[i] != '\0') return;
+	}
+	
+	//Nothing after ) assured
+	
+	string functionCall = string(line + equityPosition);
+	line[equityPosition] = '\0';
+	
+	i = 0;
+	string offSet = "";
+	while(stringContainsChar(wordSeparators, line[i])) offSet += line[i++];
+	
+	int j = 0;
+	while(line[i] != '\0') line[j++] = line[i++];
+	line[j] = '\0';
+	
+	string result = offSet + "unpackingFunctionArguments " + functionCall;
+	
+	vector<string> words = smartSplitWords(line, "", ",");
+	
+	if(words.size() <= 1){
+		return;
+	}
+	
+	for(int i = 0; i < words.size(); i++){
+		words[i] = removeTrailingWhitespace(words[i]);
+		if(words[i] == "_")
+			continue;
+		result += offSet + words[i] + " = get<" + to_string(i) + ">(unpackingFunctionArguments)\n";
+	}
+
+	strcpy(input, result.c_str());
+}
+
+void implyMultipleReturnValues(char * line){
+	if(getFirstWord(line) != "return")
+		return;
+	
+	int i = 0;
+	while(line[i] == ' ' || line[i] == '\t') i++;
+	i += 7;
+	
+	vector<string> words = smartSplitWords(line + i, "", ",");
+	
+	if(words.size() <= 1)
+		return;
+	
+	string result = "";
+	for(int j = 0; j < i; j++)
+		result += line[j];
+	result += "make_tuple(";
+	for(string word : words)
+		result += removeTrailingWhitespace(word) + ", ";
+	result[result.size()-2] = ')';
+	result[result.size()-1] = '\n';
+	strcpy(line, result.c_str());	
+}
+
+void treatMultipleReturnFunctions(const char * filename){
+	FILE * input = fopen(filename, "r");
+	if(input == NULL)
+		return;
+	
+	FILE * output = fopen(tempFile, "w+");
+	char line[LINESZ];
+	while (fgets (line, LINESZ, input)) {
+		implyMultipleReturnValues(line);
+		makeMultipleReturnAssignments(line);
+		fprintf(output, "%s", line);
+	}
+	fclose(input);
+	fclose(output);
+	remove(filename);
+	rename(tempFile, filename);
+	return;
+}
+
 void firstReplaces(const char * filename){
 	treatLineEndings(filename);
 	replaceRawIncludes(filename);
@@ -491,4 +599,5 @@ void firstReplaces(const char * filename){
 	treatCurlyBrackets(filename);
 	replaceQuickPrints(filename);
 	formatSpacing(filename);
+	treatMultipleReturnFunctions(filename);
 }
