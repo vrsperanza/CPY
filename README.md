@@ -44,7 +44,7 @@ operations(int a, b)
 	return sum, subtract, multiply, divide
 	
 main()
-	sum, _, mult = sumSubtract(20, 10)
+	sum, _, mult = operations(20, 10)
 	! sum mult
 
 //Produces the output:
