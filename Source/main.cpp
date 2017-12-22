@@ -67,7 +67,10 @@ void smartCompilation(map<string, vector<string> > dependenceMap, string mainFil
 			
 			if(!silent)
 				cout << systemCall << endl;
-			system(systemCall.c_str());
+			int returnValue = system(systemCall.c_str());
+			if(returnValue != 0)
+				return;
+			
 			
 			//One object file was updated, linking has to happen again
 			someObjectUpdated = true;

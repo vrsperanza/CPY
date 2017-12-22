@@ -190,18 +190,15 @@ void implyVariablesType(char * line){
 		wordGroups.back().push_back(firstSplit[i]);
 	}
 	
-	cout << "LINE: " << line;
 	line[0] = '\0';
 	
 	int whiteSpaceID = 0;
 	for(vector<string> words : wordGroups){
-		cout << "GROUP:\n";
 		
 		if(words.size() >= 3 && words[1] == "=" && !wordSeen(words[0]))
 			words[0] = "auto " + words[0];
 		
 		for(string word : words){
-			cout << "\t" << word << endl;
 			strcat(line, firstSplit[whiteSpaceID].c_str());
 			strcat(line, word.c_str());
 			seenWords.back().insert(word);
