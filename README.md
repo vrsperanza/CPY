@@ -78,10 +78,11 @@ Can imply parenthesis on if, switch, for and while:
 		...
 ```
 
-Can imply ">>" and "<<" on cin and cout, switch, for and while:
+Can imply ">>" and "<<" on cin, cout and cerr
 ```
 	cin a b
 	cout a b endl
+	cerr a b endl
 ```
 
 Four new print functions:
