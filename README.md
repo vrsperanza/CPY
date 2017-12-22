@@ -44,7 +44,7 @@ operations(int a, b)
 	return sum, subtract, multiply, divide
 	
 main()
-	sum, _, mult = sumSubtract(20, 10)
+	sum, _, mult = operations(20, 10)
 	! sum mult
 
 //Produces the output:
@@ -78,10 +78,11 @@ Can imply parenthesis on if, switch, for and while:
 		...
 ```
 
-Can imply ">>" and "<<" on cin and cout, switch, for and while:
+Can imply ">>" and "<<" on cin, cout and cerr
 ```
 	cin a b
 	cout a b endl
+	cerr a b endl
 ```
 
 Four new print functions:
