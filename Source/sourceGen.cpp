@@ -198,6 +198,12 @@ void implyVariablesType(char * line){
 		if(words.size() >= 3 && words[1] == "=" && !wordSeen(words[0]))
 			words[0] = "auto " + words[0];
 		
+		if(words.size() > 0 && words[0] == "known"){
+			words[0] = "";
+			if(whiteSpaceID+2 < firstSplit.size())
+				firstSplit[whiteSpaceID+2] = "";
+		}
+		
 		for(string word : words){
 			strcat(line, firstSplit[whiteSpaceID].c_str());
 			strcat(line, word.c_str());

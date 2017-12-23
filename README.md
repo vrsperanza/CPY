@@ -27,11 +27,19 @@ With the use of a flag (-ex) generates a c++ project folder, makefile included, 
 Implies semicolons from endlines,
 Implies {} using identation,
 
-Implies variable types from assignment:
+Can imply variable types from assignment:
 ```
 a = 10
 b = a
 //Declares a and b as integers
+```
+
+Sometimes you don't want to declare a new instance of a not directly visible variable, this the known tag was created
+```
+void Rectangle::set_values (int w, h)
+	known width = w
+	known height = h
+//This will tell the compiler width and height are inside the Rectangle namespace, thus not implying variable declaration
 ```
 
 Can return multiple values from functions:
