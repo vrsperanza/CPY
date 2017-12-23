@@ -3,7 +3,7 @@
 int main()
 	int a, b;
 	std::string str;
-	? "Type two integers and a string: " a b "uuuuhhhh, two integers done!\nOnly one string to go: " str "Well done!\n"
+	? "Type two integers: " a b "Well done! Now type a string: " str "Congratulations!\n"
 	
 	!
 	! "Following line is produced by command: ! a b str \"Second string\""

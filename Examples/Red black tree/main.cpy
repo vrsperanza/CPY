@@ -49,6 +49,4 @@ int main()
 			//printf("treeCostlyPrint %d\n", x)
 			treeCostlyPrint(*root)
 			printf("\n")
-		else
-			printf("%d is not a valid option\n", o)
 	tree_free(root)

@@ -14,7 +14,6 @@ bool stringContainsChar(string s, char check){
 }
 
 bool stringContainsChar(string s1, string s2){
-	const std::string validChars = "AaBbCcDd";
 	for(char c : s1)
 		if(s2.find_first_of(c) != string::npos)
 			return true;
@@ -22,7 +21,10 @@ bool stringContainsChar(string s1, string s2){
 }
 
 bool isWhitespace(string s, string ignore=whiteSpace){
-	return stringContainsChar(ignore, s);
+	for(char c : s)
+		if(ignore.find(c) == string::npos)
+			return false;
+	return true;
 }
 
 string removeTrailingWhitespace(string s, string whitespace=" \t\n"){

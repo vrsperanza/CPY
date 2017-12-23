@@ -11,8 +11,9 @@ class Rectangle
 void Rectangle::set_values (int x, y)
 	//In this case, width and height are declared inside the Rectangle scope, thus not directly visible
 	//known tag is to be used when you don't want an assignment to declare a diferent variable in it's first appearence
-	known width = x
-	known height = y
+	known width, height
+	width = x
+	height = y
 
 int main ()
 	Rectangle rect

@@ -122,7 +122,7 @@ void interrogationPrintParse(char * line){
 			} else
 				s += " << \" | " + words[i] + " = \" << " + words[i];
 		}
-		s += '\n';
+		s += " << std::endl\n";
 		strcpy(line, s.c_str());
 		return;
 	}

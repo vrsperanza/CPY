@@ -181,11 +181,11 @@ bool wordSeen(string word){
 }
 
 void implyVariablesType(char * line){
-	vector<string> firstSplit = smartSplitWords(line, "", " \t\r\n()[]{},.;!@#%^&*-+/:\'\\", true);
+	vector<string> firstSplit = smartSplitWords(line, "", " \t\n()[]{},.;!@#%^&*-+/:\'\\", true);
 	vector<vector<string> > wordGroups;
 	wordGroups.push_back(vector<string>());
 	for(int i = 1; i < firstSplit.size(); i += 2){
-		if(!isWhitespace(firstSplit[i-1], " <>[]-"))
+		if(!isWhitespace(firstSplit[i-1], " \t\n<>)[]-!@#%^&*-+/:\'\"\\"))
 			wordGroups.push_back(vector<string>());
 		wordGroups.back().push_back(firstSplit[i]);
 	}
@@ -193,12 +193,70 @@ void implyVariablesType(char * line){
 	line[0] = '\0';
 	
 	int whiteSpaceID = 0;
+	string type = "";
+	for(int id = 0; id < wordGroups.size(); id++){
+		if(wordGroups[id].size() == 1 && (removeTrailingWhitespace(firstSplit[whiteSpaceID]) == "," || removeTrailingWhitespace(firstSplit[whiteSpaceID]) == ";" || removeTrailingWhitespace(firstSplit[whiteSpaceID]) == "") && type == "known"){
+			seenWords.back().insert(wordGroups[id][0]);
+			wordGroups[id][0] = "";
+			if(whiteSpaceID+2 < firstSplit.size())
+				firstSplit[whiteSpaceID+2] = "";
+		}
+		else if(wordGroups[id].size() > 2 && wordGroups[id][1] == "="){
+			if(type == "known"){
+				seenWords.back().insert(wordGroups[id][0]);
+				if(whiteSpaceID + 2 * wordGroups[id].size() < firstSplit.size())
+					firstSplit[whiteSpaceID + 2 * wordGroups[id].size()] = "; ";
+			}
+		}
+		else if(wordGroups[id].size() > 2){
+			type = wordGroups[id][0];
+		}
+		else if(wordGroups[id].size() == 2){
+			type = wordGroups[id][0];
+			
+			if(type == "known"){
+				seenWords.back().insert(wordGroups[id][1]);
+				wordGroups[id][0] = "";
+				wordGroups[id][1] = "";
+				if(whiteSpaceID+2 < firstSplit.size()){
+					firstSplit[whiteSpaceID+1] = "";
+					firstSplit[whiteSpaceID+2] = "";
+				}
+				if(whiteSpaceID+4 < firstSplit.size()){
+					firstSplit[whiteSpaceID+3] = "";
+					firstSplit[whiteSpaceID+4] = "";
+				}
+			}
+		}
+		
+		if(wordGroups[id].size() > 2 && wordGroups[id][2] == "="){
+			type = wordGroups[id][0];
+			
+			if(type == "known")
+				seenWords.back().insert(wordGroups[id][1]);
+		}
+		
+		
+		whiteSpaceID += 2 * wordGroups[id].size();
+	}
+	
+	whiteSpaceID = 0;
 	for(vector<string> words : wordGroups){
 		
-		if(words.size() >= 3 && words[1] == "=" && !wordSeen(words[0]))
-			words[0] = "auto " + words[0];
+		if(words.size() >= 2 && words[1] == "=" && !wordSeen(words[0])){
+			words.insert (words.begin(), 1, "auto");
+			firstSplit.insert (firstSplit.begin() + whiteSpaceID + 1, 2, " ");
+			firstSplit[whiteSpaceID + 1] = "auto";
+		}
 		
 		if(words.size() > 0 && words[0] == "known"){
+			if(words.size() == 2){
+				seenWords.back().insert(words[1]);
+				words[1] = "";
+				if(whiteSpaceID+4 < firstSplit.size())
+					firstSplit[whiteSpaceID+4] = "";
+			}
+			
 			words[0] = "";
 			if(whiteSpaceID+2 < firstSplit.size())
 				firstSplit[whiteSpaceID+2] = "";
@@ -213,6 +271,11 @@ void implyVariablesType(char * line){
 	}
 	if(whiteSpaceID < firstSplit.size())
 		strcat(line, firstSplit[whiteSpaceID].c_str());
+	
+	if(isWhitespace(string(line), " \t,;\n")){
+		line[0] = '\n';
+		line[1] = '\0';
+	}
 }
 
 int closeKeys(int offset, bool beauty){
