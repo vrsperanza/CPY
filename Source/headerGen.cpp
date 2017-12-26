@@ -35,7 +35,7 @@ void generateHeader(char * inputFile, char * outputFile){
 	int aux, i;
 	
 	int bracketsCount = 0;
-	int isInsideStruct = 0;
+	int exportingKeyCloseAmount = 0;
 	char buff[LINESZ];
 	char nameBuff[100];
 	int buffLen;
@@ -61,10 +61,10 @@ void generateHeader(char * inputFile, char * outputFile){
 			}
 		}
 		
-		if(!multiLineComment && isExternalInclude(buff)){
+		if(!multiLineComment && (isExternalInclude(buff) || isNamespaceDeclaration(buff))){
 			fprintf(output, "%s", buff);
 			keepLine = false;
-		} else if(string_isSubstring(buff, "struct") != -1){
+		} else if(string_isWord(buff, "struct") != -1 || string_isWord(buff, "class") != -1){
 			int hasParentheses = 0;
 			int hasBrackets = 0;
 			for(aux = 0; buff[aux] != '\0'; aux ++){
@@ -74,19 +74,22 @@ void generateHeader(char * inputFile, char * outputFile){
 					hasBrackets = 1;
 			}
 			if(hasParentheses == 0 && hasBrackets == 1){
-				isInsideStruct = 1;
+				exportingKeyCloseAmount = 1;
 			}
-		} else if(string_isSubstring(buff, "typedef") != -1){
+		} else if(string_isWord(buff, "typedef") != -1){
 			fprintf(output, "%s\n", buff);
 			keepLine = false;
 		}
 		
-		if(isInsideStruct == 1){
+		if(exportingKeyCloseAmount){
 			keepLine = false;
 			fprintf(output, "%s", buff);
-			for(aux = 0;buff[aux] != '\0'; aux ++){
-				if(buff[aux] == '}'){
-					isInsideStruct = 0;
+			for(aux = 0; buff[aux] != '\0'; aux ++){
+				if(buff[aux] == '{'){
+					exportingKeyCloseAmount++;
+				}
+				else if(buff[aux] == '}'){
+					exportingKeyCloseAmount--;
 				}
 			}
 		}

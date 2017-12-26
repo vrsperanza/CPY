@@ -118,6 +118,10 @@ bool isExternalInclude(char * line){
 	return false;
 }
 
+bool isNamespaceDeclaration(char * line){
+	return smartSplitWords(line, "using").size() > 0;
+}
+
 int internalInclude(char * line){
 	char stringInclude[] = "#include";
 	int i;

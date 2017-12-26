@@ -12,6 +12,7 @@ int stringClosePosition(char * line, int startPos);
 int closePosition(char * line, int startPos, char open, char close);
 void addPahrenthesis(char * s);
 bool isExternalInclude(char * line);
+bool isNamespaceDeclaration(char * line);
 int internalInclude(char * line);
 string rawInclude(char * line);
 vector<string> splitWords(char * line, string firstWordRequired="", string separators=wordSeparators);
