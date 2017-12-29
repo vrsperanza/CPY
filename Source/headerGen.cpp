@@ -15,10 +15,26 @@ using namespace std;
 #include "dependenciesMapper.h"
 
 int headersMade = 0;
+
+void exportUntilKeyClose(FILE * input, FILE * output, FILE * lineBreakCompensation){
+	int keyAmt = 1;
+	char line[LINESZ];
+	while (keyAmt && fgets (line, LINESZ, input)) {
+		for(int i = 0; line[i] != '\0'; i++){
+			if(line[i] == '{')
+				keyAmt++;
+			else if(line[i] == '}')
+				keyAmt--;
+		}
+		fprintf(output, "%s", line);
+		fprintf(lineBreakCompensation, "\n");
+	}
+}
+
 void generateHeader(char * inputFile, char * outputFile){	
 	FILE * input = fopen(inputFile, "r");
-	FILE * output = fopen(outputFile, "w+");
-	FILE * temp = fopen(tempFile, "w+");
+	FILE * header = fopen(outputFile, "w+");
+	FILE * source = fopen(tempFile, "w+");
 	
 	char inputFileHeader[100];
 	strcpy(inputFileHeader, inputFile);
@@ -29,119 +45,58 @@ void generateHeader(char * inputFile, char * outputFile){
 	removeExtension(inputFileName);
 	
 	headersMade++;
-	fprintf(output, "#ifndef _PROCEDURALHEADER%d_%s_H_\n", headersMade, inputFileName);
-	fprintf(output, "#define _PROCEDURALHEADER%d_%s_H_\n", headersMade, inputFileName);
-
-	int aux, i;
+	fprintf(header, "#ifndef _PROCEDURALHEADER%d_%s_H_\n", headersMade, inputFileName);
+	fprintf(header, "#define _PROCEDURALHEADER%d_%s_H_\n", headersMade, inputFileName);
 	
-	int bracketsCount = 0;
-	int exportingKeyCloseAmount = 0;
-	char buff[LINESZ];
-	char nameBuff[100];
-	int buffLen;
-	
-	bool multiLineComment = false;
-	
-	bool includedSelf = false;
-	
-	while (fgets (buff, LINESZ, input)) {
-		bool keepLine = true;
-		
-		for(i = 0; buff[i] != '\0'; i++){
-			if(buff[i] == '/' && buff[i+1] == '*') multiLineComment = true;
-			else if(buff[i] == '*' && buff[i+1] == '/') multiLineComment = false;
+	char line[LINESZ];
+	bool headerIncluded = false;
+	while (fgets (line, LINESZ, input)) {
+		bool toHeader = false;
+		bool toSource = true;
+		bool functionDeclaration = false;
+		if(line[0] == '#'){
+			toHeader = true;
+			toSource = false;
 		}
-		
-		if(bracketsCount == 0 && !includedSelf && !multiLineComment){
-			for(i = 0; buff[i] == ' ' || buff[i] == '\t'; i++);
-			if(buff[i] == '\n'){
-				fprintf(temp, "#include \"%s\"", inputFileHeader);
-				includedSelf = true;
-				keepLine = false;
+		else if(isFunctionDeclaration(line)){
+			toHeader = true;
+			toSource = true;
+			functionDeclaration = true;
+		}
+		else if(string_isWord(line, "struct") != -1 || string_isWord(line, "class") != -1){
+			int len = strlen(line);
+			for(len = len-1; stringContainsChar(" \t\n", line[len]); len--);
+			if(len != -1 && line[len] == '{'){
+				fprintf(header, "%s", line);
+				exportUntilKeyClose(input, header, source);
+				continue;
 			}
 		}
 		
-		if(!multiLineComment && (isExternalInclude(buff) || isNamespaceDeclaration(buff))){
-			fprintf(output, "%s", buff);
-			keepLine = false;
-		} else if(string_isWord(buff, "struct") != -1 || string_isWord(buff, "class") != -1){
-			int hasParentheses = 0;
-			int hasBrackets = 0;
-			for(aux = 0; buff[aux] != '\0'; aux ++){
-				if(buff[aux] == '(' || buff[aux] == ')')
-					hasParentheses = 1;
-				else if(buff[aux] == '{')
-					hasBrackets = 1;
-			}
-			if(hasParentheses == 0 && hasBrackets == 1){
-				exportingKeyCloseAmount = 1;
-			}
-		} else if(string_isWord(buff, "typedef") != -1){
-			fprintf(output, "%s\n", buff);
-			keepLine = false;
-		}
+		if(toSource)
+			fprintf(source, "%s", line);
+		else if(!headerIncluded){
+			headerIncluded = true;
+			fprintf(source, "#include \"%s\"\n", inputFileHeader);
+		} else
+			fprintf(source, "\n");		
 		
-		if(exportingKeyCloseAmount){
-			keepLine = false;
-			fprintf(output, "%s", buff);
-			for(aux = 0; buff[aux] != '\0'; aux ++){
-				if(buff[aux] == '{'){
-					exportingKeyCloseAmount++;
-				}
-				else if(buff[aux] == '}'){
-					exportingKeyCloseAmount--;
-				}
+		if(toHeader){
+			if(functionDeclaration){
+				int l = strlen(line);
+				for(l = l-1; l != -1 && line[l] != '{'; l--);
+				if(l != -1)
+					line[l] = ';';
 			}
-		}
-		else{
-			for(aux = 0; buff[aux] != '\0'; aux ++){
-				if(aux > 0 && buff[aux] == '/' && buff[aux-1] == '/') break;
-				else if(buff[aux] == '{'){
-					if(bracketsCount == 0){
-						
-						char exportFunc[LINESZ];
-						strcpy(exportFunc, buff);
-						
-						exportFunc[aux] = ';';
-						for(int i = 0; buff[i] != '\0'; i++){
-							if(buff[i] == '='){
-								while(buff[i] != ',' && buff[i] != ')' && buff[i] != '{' && buff[i] != '\n' && buff[i] != '\0')
-									buff[i++] = ' ';
-							}
-						}
-						
-						fprintf(output, "%s", exportFunc);
-					}
-					bracketsCount++;
-				}
-				else if(buff[aux] == '}'){
-					bracketsCount--;
-					if(bracketsCount < 0){
-						exit(-1);
-					}
-				}
-			}
-		}
-		
-		
-		if(keepLine){
-			fprintf(temp, "%s", buff);
-		} else {			
-			if(!includedSelf && !multiLineComment){
-				fprintf(temp, "#include \"%s\"", inputFileHeader);
-				includedSelf = true;
-			}			
-			fprintf(temp, "\n");
+			
+			fprintf(header, "%s", line);
 		}
 	}
-	if(bracketsCount > 0){
-		exit(-1);
-	}
-	fprintf(output, "#endif");	
+	fprintf(header, "#endif");
 	
+	fclose(header);
+	fclose(source);
 	fclose(input);
-	fclose(output);
-	fclose(temp);
 	
 	remove(inputFile);
 	rename(tempFile, inputFile);

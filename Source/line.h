@@ -18,5 +18,5 @@ string rawInclude(char * line);
 vector<string> splitWords(char * line, string firstWordRequired="", string separators=wordSeparators);
 string getFirstWord(char * line, string separators=wordSeparators);
 vector<string> smartSplitWords(char * line, string firstWordRequired="", string separators=wordSeparators, bool keepSplits=false);
-
+bool isFunctionDeclaration(char * line);
 #endif

@@ -107,13 +107,14 @@ void implyFunction(char * s){
 	if( !canDeclareFunction || 
 		string_isWord(s, "do") != -1 ||
 		string_isWord(s, "else") != -1 ||
+		string_isWord(s, "if") != -1 ||
 		string_isWord(s, "class") != -1 ||
 		string_isWord(s, "struct") != -1 ||
 		string_isWord(s, "typedef") != -1)
 		return;
 		
-	char lastType[LINESZ] = "\0";
-	
+	char lastType[LINESZ];
+	lastType[0] = '\0';
 	int typeStartIndex = 0;
 	
 	int i = 0;
@@ -189,6 +190,8 @@ bool wordSeen(string word){
 }
 
 void implyVariablesType(char * line){
+	if(line[0] == '#') return;
+	
 	vector<string> firstSplit = smartSplitWords(line, "", " \t\n()[]{},.;!@#%^&*-+/:\'\\", true);
 	vector<vector<string> > wordGroups;
 	wordGroups.push_back(vector<string>());
@@ -382,10 +385,14 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 	canDeclareFunction = true;
 	structTypedef = false;
 	
-	strcpy(buffPrevious, "");
+	buffPrevious[0] = '\0';
 	
-	char emptyLinesBuffPrevious[LINESZ] = "";
-	char emptyLinesBuff[LINESZ] = "";
+	char emptyLinesBuffPrevious[LINESZ];
+	emptyLinesBuffPrevious[0] = '\0';
+	char emptyLinesBuff[LINESZ];
+	emptyLinesBuff[0] = '\0';
+	
+	bool firstPrevious = true;
 	
 	while (fgets (buff, LINESZ, input)) {
 		//Skip empty lines
@@ -454,7 +461,6 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 			
 			if(offset > offSets.top()){
 				implyFunction(buffPrevious);
-				addPahrenthesis(buffPrevious);
 				buffPreviousLen = strlen(buffPrevious);
 				
 				seenWords.push_back(unordered_set<string>());
@@ -481,6 +487,9 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 					buffPrevious[buffPreviousLen-2] = '{';
 				else 
 					buffPrevious[buffPreviousLen-1] = '{';
+				
+				
+				addPahrenthesis(buffPrevious);
 			} 
 			
 			outScopeAmount = closeKeys(offset, beauty);			
@@ -488,8 +497,13 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 		implyVariablesType(buffPrevious);
 		while(outScopeAmount--)
 			seenWords.pop_back();
-		fputs(emptyLinesBuffPrevious, output);
-		fputs(buffPrevious, output);
+		
+		if(!firstPrevious){
+			fputs(emptyLinesBuffPrevious, output);
+			fputs(buffPrevious, output);
+		}
+		else
+			firstPrevious = false;
 		
 		strcpy(buffPrevious, buff);
 		strcpy(emptyLinesBuffPrevious, emptyLinesBuff);

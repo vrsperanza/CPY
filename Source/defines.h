@@ -1,7 +1,7 @@
 #ifndef _GLOBALHEADER_H_43674_
 #define _GLOBALHEADER_H_43674_
 
-#define LINESZ 16384
+#define LINESZ 2048
 #define tabSpaces 4
 
 #define compilationDirectory "CompilationSource"

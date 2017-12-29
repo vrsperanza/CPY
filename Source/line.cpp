@@ -122,6 +122,43 @@ bool isNamespaceDeclaration(char * line){
 	return smartSplitWords(line, "using").size() > 0;
 }
 
+bool isFunctionDeclaration(char * line){
+	int whitespaceCount = 0;
+	int openDec = 0;
+	while(1){
+		while(stringContainsChar(" \t\r\n)[]{},.;!@#%^&*-=+/:\"\'\\", line[openDec])) openDec++;
+		if(line[openDec] == '(')
+			break;
+		
+		whitespaceCount++;
+		
+		while(!stringContainsChar(wordSeparators, line[openDec]) && line[openDec] != '\0') openDec++;
+		if(line[openDec] == '(')
+			break;
+		
+		if(line[openDec] == '\0')
+			return false;
+	}
+	
+	if(whitespaceCount == 2){
+		int len = strlen(line);
+		len--;
+		while(len >= 0 && line[len] != '{') len--;
+		if(len >= 0 && line[len] == '{'){
+			if( string_isWord(line, "do") != -1 ||
+				string_isWord(line, "else") != -1 ||
+				string_isWord(line, "if") != -1 ||
+				string_isWord(line, "class") != -1 ||
+				string_isWord(line, "struct") != -1 ||
+				string_isWord(line, "typedef") != -1)
+				return false;
+			return true;
+		}
+		else return false;
+	}
+	return false;
+}
+
 int internalInclude(char * line){
 	char stringInclude[] = "#include";
 	int i;
