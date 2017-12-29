@@ -43,6 +43,82 @@ void treatLineEndings(const char * filename){
 	return;
 }
 
+void forLoopParse(char * line){
+	vector<string> words = smartSplitWords(line, "for", " \t\n,;()=", true);
+	if(words.size() == 0)
+		return;
+	
+	if(isWhitespace(words[words.size()-1], " \t\n,;()")) words.pop_back();
+	
+	string offSet = words[0];
+	string i;
+	string n;
+	string equity = "0";
+	
+	for(int i = 0; i < words.size(); i++){
+		if(removeTrailingWhitespace(words[i], " \t\n,;()") == "="){
+			if(words.size() <= i+1){
+				printf("LINE: %s ends in incomplete equity", line);
+				exit(0);
+			}
+			equity = words[i+1];
+			words.erase(words.begin()+i,words.begin()+i+2);
+			break;
+		}
+	}
+	
+	if(words.size() == 6){
+		i = words[3];
+		n = words[5];
+		string result = "";
+		int pos = 0;
+		while(line[pos] == ' ' || line[pos] == '\t') result += line[pos++];
+		
+		result += "for(" + i + " = " + equity + "; " + i + " < " + n + "; " + i + "++)\n";
+		
+		strcpy(line, result.c_str());
+		return;
+	}
+}
+
+void rofLoopParse(char * line){
+	vector<string> words = smartSplitWords(line, "rof", " \t\n,;()=", true);
+	if(words.size() == 0)
+		return;
+	
+	if(isWhitespace(words[words.size()-1], " \t\n,;()")) words.pop_back();
+	
+	string offSet = words[0];
+	string i;
+	string n;
+	string equity = "0";
+	
+	for(int i = 0; i < words.size(); i++){
+		if(removeTrailingWhitespace(words[i], " \t\n,;()") == "="){
+			if(words.size() <= i+1){
+				printf("LINE: %s ends in incomplete equity", line);
+				exit(0);
+			}
+			equity = words[i+1];
+			words.erase(words.begin()+i,words.begin()+i+2);
+			break;
+		}
+	}
+	
+	if(words.size() == 6){
+		i = words[3];
+		n = words[5];
+		string result = "";
+		int pos = 0;
+		while(line[pos] == ' ' || line[pos] == '\t') result += line[pos++];
+		
+		result += "for(" + i + " = " + n + " - 1; " + i + " >= " + equity + "; " + i + "--)\n";
+		
+		strcpy(line, result.c_str());
+		return;
+	}
+}
+
 void exclamationPrintParse(char * line){
 	vector<string> words = smartSplitWords(line, "!", " \t\n,;", true);
 	if(words.size() > 0){		
@@ -557,7 +633,7 @@ void implyMultipleReturnValues(char * line){
 	strcpy(line, result.c_str());	
 }
 
-void treatMultipleReturnFunctions(const char * filename){
+void finalLineReplaces(const char * filename){
 	FILE * input = fopen(filename, "r");
 	if(input == NULL)
 		return;
@@ -567,6 +643,8 @@ void treatMultipleReturnFunctions(const char * filename){
 	while (fgets (line, LINESZ, input)) {
 		implyMultipleReturnValues(line);
 		makeMultipleReturnAssignments(line);
+		forLoopParse(line);
+		rofLoopParse(line);
 		fprintf(output, "%s", line);
 	}
 	fclose(input);
@@ -583,5 +661,5 @@ void firstReplaces(const char * filename){
 	treatCurlyBrackets(filename);
 	replaceQuickPrints(filename);
 	formatSpacing(filename);
-	treatMultipleReturnFunctions(filename);
+	finalLineReplaces(filename);
 }

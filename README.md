@@ -109,6 +109,16 @@ Four new print functions:
 	//arg1 = ContentOfArg1 | arg2 = ContentOfArg2 | arg3 = ContentOfArg3
 ```
 
+Two new loop functions:
+```
+	for i n
+		...
+	//Iterates i from 0 (or assigned value) to n-1, 1 at a time
+	rof i n
+		...
+	//Iterates i from n-1 to 0 (or assigned value), 1 at a time
+```
+
 New precompilation tag: #raw "file"
 Includes file's content directly in code before exporting, usefull if you can only send one file instead of a project - intended for  templates at competitive coding.
 
