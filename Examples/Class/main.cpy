@@ -1,11 +1,8 @@
 #include <iostream>
 using namespace std;
-
 #include "rectangle.h"
 
-
-
-int main ()
+main()
 	Rectangle rect
 	
 	int w, h

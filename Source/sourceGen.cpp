@@ -33,6 +33,8 @@ int buffLen;
 char buffPrevious[LINESZ];
 int buffPreviousLen;
 
+bool canDeclareFunction;
+
 bool structTypedef;
 char structName[LINESZ];
 vector<unordered_set<string> > seenWords;
@@ -44,7 +46,8 @@ void addPahrenthesis(char * s){
 			while(s[offset] != '\n')
 				offset++;
 	
-	if(string_isWord(s, "struct") >= 0)
+	if( string_isWord(s, "class") >= 0 ||
+		string_isWord(s, "struct") >= 0)
 		return;
 	
 	int len = strlen(s);
@@ -56,14 +59,7 @@ void addPahrenthesis(char * s){
 			string_isWord(s, "while")),
 			string_isWord(s, "switch"));
 		
-		if(lookStart == -1){
-			if(string_isWord(s, "do") == -1 &&
-			   string_isWord(s, "else") == -1 &&
-			   string_isWord(s, "class") == -1 &&
-			   string_isWord(s, "struct") == -1)
-				implyFunctionParametersType(s);
-		}
-		else{
+		if(lookStart != -1){
 			int i = lookStart;
 			while(stringContainsChar(" \t\n", s[i]))
 				i++;
@@ -107,7 +103,15 @@ void addPahrenthesis(char * s){
 	}
 }
 
-void implyFunctionParametersType(char * s){	
+void implyFunction(char * s){
+	if( !canDeclareFunction || 
+		string_isWord(s, "do") != -1 ||
+		string_isWord(s, "else") != -1 ||
+		string_isWord(s, "class") != -1 ||
+		string_isWord(s, "struct") != -1 ||
+		string_isWord(s, "typedef") != -1)
+		return;
+		
 	char lastType[LINESZ] = "\0";
 	
 	int typeStartIndex = 0;
@@ -118,18 +122,22 @@ void implyFunctionParametersType(char * s){
 	int wordCount = 0;
 	while(s[i] != '(' && s[i] != '\0'){
 		if(s[i] == ' ' || s[i] == '\t'){
-			wordCount++;
 			while(s[i] == ' ' || s[i] == '\t') i++;
+			if(s[i] != '(' && s[i] != '\0')
+				wordCount++;
 			i--;
 		}
 		i++;
 	}
 	
 	if(wordCount == 0){
+		int pos = 0;
+		while(s[pos] == ' ' || s[pos] == '\t') pos++;
+		
 		if(string_isWord(s, "main") != -1)
-			stringInsert(s, "int ", 0);
+			stringInsert(s, "int ", pos);
 		else
-			stringInsert(s, "auto ", 0);
+			stringInsert(s, "auto ", pos);
 	}	
 	
 	if(s[i] == '(') i++;
@@ -334,6 +342,10 @@ int closeKeys(int offset, bool beauty){
 			buffPrevious[buffPreviousLen] = '\0';
 		}
 	}
+	if(offSets.top() == 0)
+		canDeclareFunction = true;
+	else
+		canDeclareFunction = closeWithLineEnding.top();
 	return closeAmount;
 }
 
@@ -349,11 +361,6 @@ int placeLineEnding(char * line){
 		line[++last] = '\0';
 	}
 	return last;
-}
-
-void lineImplications(char * line){
-	addPahrenthesis(line);
-	implyVariablesType(line);
 }
 
 void generateSource(char * inputFile, char * outputFile, bool beauty){
@@ -372,7 +379,7 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 	seenWords.push_back(unordered_set<string>());
 	
 	multiLineComment = false;
-	
+	canDeclareFunction = true;
 	structTypedef = false;
 	
 	strcpy(buffPrevious, "");
@@ -446,10 +453,15 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 			buffLen = placeLineEnding(buff);
 			
 			if(offset > offSets.top()){
+				implyFunction(buffPrevious);
+				addPahrenthesis(buffPrevious);
+				buffPreviousLen = strlen(buffPrevious);
+				
 				seenWords.push_back(unordered_set<string>());
 				
 				offSets.push(offset);
 				closeWithLineEnding.push(false);
+				canDeclareFunction = false;
 				
 				if(string_isWord(buffPrevious, "struct") >= 0){
 					closeWithLineEnding.top() = true;
@@ -462,6 +474,7 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 				
 				if(string_isWord(buffPrevious, "class") >= 0){
 					closeWithLineEnding.top() = true;
+					canDeclareFunction = true;
 				}
 				
 				if(buffPrevious[buffPreviousLen-1] == '\n')
@@ -472,7 +485,7 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 			
 			outScopeAmount = closeKeys(offset, beauty);			
 		}
-		lineImplications(buffPrevious);
+		implyVariablesType(buffPrevious);
 		while(outScopeAmount--)
 			seenWords.pop_back();
 		fputs(emptyLinesBuffPrevious, output);
@@ -485,7 +498,7 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
     }
 	
 	int outScopeAmount = closeKeys(0, beauty);
-	lineImplications(buffPrevious);
+	implyVariablesType(buffPrevious);
 	while(outScopeAmount--)
 		seenWords.pop_back();
 	fputs(emptyLinesBuffPrevious, output);
