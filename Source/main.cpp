@@ -254,7 +254,7 @@ int main(int argc, char ** argv){
 		
 		if(run){
 			printf("Running code:\n");
-			system(target);
+			system(((string)".." + (string)slash + (string)target).c_str());
 		}
 	}
 }
