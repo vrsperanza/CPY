@@ -31,10 +31,10 @@ main()
 	
 	max, min = findBiggestSmallest(arr, size)
 	
-	cout "Array: "
+	!! "Array:"
 	for i = 0; i < size; i++
-		cout arr[i] " "
-	cout endl
+		!! arr[i]
+	!
 	
 	! "Biggest number:" max
 	! "Smallest number:" min

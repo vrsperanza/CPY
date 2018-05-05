@@ -138,12 +138,8 @@ void exclamationPrintParse(char * line){
 	words = smartSplitWords(line, "!!", " \t\n,;", true);
 	if(words.size() > 0){
 		string s = words[0] + "std::cout";
-		bool first = true;
 		for(int i = 3; i < words.size(); i += 2){
-			if(!first)
-				s += " << \" \"";
-			first = false;
-			s += " << " + words[i];
+			s += " << " + words[i] + " << \" \"";
 		}
 		s += '\n';
 		strcpy(line, s.c_str());
