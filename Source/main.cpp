@@ -236,6 +236,7 @@ int main(int argc, char ** argv){
 	//Generate necessary headers
 	for(string fileName : requiredHeaders){
 		if(allowedHeaders.count(fileName)){
+			stringToCPP(fileName, cppFile);
 			stringToH(fileName, headerFile);
 			if(fileExist(headerFile))
 				remove(headerFile);

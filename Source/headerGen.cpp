@@ -31,7 +31,7 @@ void exportUntilKeyClose(FILE * input, FILE * output, FILE * lineBreakCompensati
 	}
 }
 
-void generateHeader(char * inputFile, char * outputFile){	
+void generateHeader(const char * inputFile, const char * outputFile){	
 	FILE * input = fopen(inputFile, "r");
 	FILE * header = fopen(outputFile, "w+");
 	FILE * source = fopen(tempFile, "w+");
@@ -54,7 +54,7 @@ void generateHeader(char * inputFile, char * outputFile){
 		bool toHeader = false;
 		bool toSource = true;
 		bool functionDeclaration = false;
-		if(line[0] == '#'){
+		if(line[0] == '#' || string_isSubstring(line, "using namespace") != -1){
 			toHeader = true;
 			toSource = false;
 		}
