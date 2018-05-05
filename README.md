@@ -9,7 +9,7 @@ CPY is a (Pre)Compiler of .cpy files, those are basically C++ withought redundan
 	Semicolons are implied from line breaks (lines must be marked to continue, not to break)
 	Headers are interpreted from the sources and includes
 	Can return multiple values from functions
-	While still being strongly typed (and just as fast as C++, for it is just a pre-compiler)
+	While still being statically typed (and just as fast as C++, for it is just a pre-compiler)
 		variable types can be implied from equity or manually specified.
 	Sequenced style declarations have also been generalised to functions:
 		"int a, b" works inside function declarations
