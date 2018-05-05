@@ -4,7 +4,7 @@ To compile cpy files use the created executable targeting the main file of the r
 	cpy main.cpy -flags
 
 ```
-CPY is a (Pre)Compiler of .cpy files, those are basically C++ withought redundancy.
+CPY is a (Pre)Compiler of .cpy files, those are basically C++ without redundancy.
 	Curly brackets are implied from identation
 	Semicolons are implied from line breaks (lines must be marked to continue, not to break)
 	Headers are interpreted from the sources and includes

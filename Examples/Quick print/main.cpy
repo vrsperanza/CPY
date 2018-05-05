@@ -10,7 +10,7 @@ int main()
 	! a b str "Second string"
 	!
 	
-	!! "!! is a quick print withought ending the line..."
+	!! "!! is a quick print without ending the line..."
 	! " Ending the line in the following command exemplified!"
 	
 	! "Following line is produced by command: ?? a b str"
