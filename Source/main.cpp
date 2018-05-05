@@ -253,7 +253,8 @@ int main(int argc, char ** argv){
 		smartCompilation(dependenceMap, stringSource, (string)target, (string)compilation, silent);
 		
 		if(run){
-			printf("Running code:\n");
+			if(!silent)
+				printf("Running code:\n");
 			system(((string)".." + (string)slash + (string)target).c_str());
 		}
 	}
