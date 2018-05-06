@@ -1,33 +1,33 @@
 #include <string>
-#include <string.h>
 using namespace std;
 
 #include "defines.h"
+#include "string.h"
 
 
 
-bool stringContainsChar(string s, char check){
+bool stringContainsChar(const string& s, const char& check){
 	for(char c : s)
 		if(c == check)
 			return true;
 	return false;
 }
 
-bool stringContainsChars(string s1, string s2){
+bool stringContainsChars(const string& s1, const string& s2){
 	for(char c : s1)
 		if(s2.find_first_of(c) != string::npos)
 			return true;
 	return false;
 }
 
-bool isWhitespace(string s, string ignore=whiteSpace){
+bool isWhitespace(const string& s, string ignore){
 	for(char c : s)
 		if(ignore.find(c) == string::npos)
 			return false;
 	return true;
 }
 
-string removeTrailingWhitespace(string s, string whitespace=" \t\n"){
+string removeTrailingWhitespace(string& s, string whitespace){
 	int i = 0;
 	while(stringContainsChar(whitespace, s[i])) i++;
 	
@@ -36,7 +36,7 @@ string removeTrailingWhitespace(string s, string whitespace=" \t\n"){
 	return s.substr(i, j-i+1);
 }
 
-char strsub(char * a, char * b, int as){
+char strsub(const char* a, const char* b, int as){
 	int bs = 0;
 	while(a[as] != '\0' && b[bs] != '\0'){
 		if(a[as++] != b[bs++])
@@ -45,7 +45,7 @@ char strsub(char * a, char * b, int as){
 	return 1;
 }
 
-int string_isSubstring(char* mainStr, string subStr){
+int string_isSubstring(const char* mainStr, const string& subStr){
     int aux;
     for(aux = 0; mainStr[aux] != '\0'; aux++){
         int aux1;
@@ -57,7 +57,7 @@ int string_isSubstring(char* mainStr, string subStr){
     return -1;
 }
 
-int string_isWord(char* mainStr, string subStr, string separators=wordSeparators){
+int string_isWord(const char* mainStr, const string& subStr, string separators){
     int aux;
     for(aux = 0; mainStr[aux] != '\0'; aux++){
 		if(aux-1 == -1 || stringContainsChar(separators, mainStr[aux-1])){
@@ -73,7 +73,7 @@ int string_isWord(char* mainStr, string subStr, string separators=wordSeparators
     return -1;
 }
 
-void strInsert(char * dest, char * insert, int index){
+void strInsert(char* dest, const char* insert, int index){
 	char destCpy[LINESZ];
 	strcpy(destCpy, dest);
 	int len = strlen(insert);
@@ -88,7 +88,7 @@ void strInsert(char * dest, char * insert, int index){
 	}
 }
 
-void stringInsert(char * dest, string insert, int index){
+void stringInsert(char* dest, const string& insert, int index){
 	char destCpy[LINESZ];
 	strcpy(destCpy, dest);
 	int len = insert.size();
@@ -102,7 +102,7 @@ void stringInsert(char * dest, string insert, int index){
 	}
 }
 
-void getStructName(char * line, char * buffer){
+void getStructName(const char* line, char* buffer){
 	int spc = 0;
 	int i, j;
 	for(i = 0; line[i] != '\0' && spc < 2; i++){
@@ -124,7 +124,7 @@ void getStructName(char * line, char * buffer){
 	buffer[j] = '\0';
 }
 
-bool isEmptyLine(char * line){
+bool isEmptyLine(const char* line){
 	for(int i = 0; line[i] != '\0' && !(line[i] == '/' && line[i+1] == '/'); i++){
 		if(line[i] != ' ' && line[i] != '\t' && line[i] != '\n')
 			return false;
@@ -132,7 +132,7 @@ bool isEmptyLine(char * line){
 	return true;
 }
 
-bool structHasTypedef(char * line){
+bool structHasTypedef(const char* line){
 	if(string_isSubstring(line, "typedef") >= 0)
 		return true;
 	return false;
