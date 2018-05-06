@@ -44,12 +44,28 @@ void treatLineEndings(const char * filename){
 }
 
 void forLoopParse(char * line){
-	if(stringContainsChars(line, ";:,><"))
-		return;
-	
+	bool rof = false;
 	vector<string> words = smartSplitWords(line, "for", " \t\n,;()=", true);
+	if(words.size() == 0){
+		words = smartSplitWords(line, "rof", " \t\n,;()=", true);
+		rof = true;
+	}
+
 	if(words.size() == 0)
 		return;
+	
+	
+	if(stringContainsChars(line, ";:,><")){
+		if(rof){
+			words[1] = "for";
+			string result = "";
+			for(string s : words)
+				result += s;
+			strcpy(line, result.c_str());
+		}
+		
+		return;
+	}
 	
 	if(isWhitespace(words[words.size()-1], " \t\n,;()")) words.pop_back();
 	
@@ -65,14 +81,18 @@ void forLoopParse(char * line){
 	if(words.size() < 7){
 		start = "0";
 		n = words[5];
-		comparison = " < ";
+		
+		if(rof)
+			comparison = " >= ";
+		else
+			comparison = " < ";
 	}
 	else{
 		start = words[5];
 		n = words[7];
 	}
+	
 	if(words.size() > 11){
-		
 		step = " " + words[9] + "= " + words[11];
 		if(words[9] == "-")
 			comparison = " >= ";
@@ -84,8 +104,14 @@ void forLoopParse(char * line){
 		comparison = " < ";
 	}
 	else{
-		step = "++";
-		comparison = " < ";
+		if(rof){
+			step = "--";
+			comparison = " >= ";
+		}
+		else {
+			step = "++";
+			comparison = " < ";
+		}
 	}
 	
 	string result = words[0] + "for(" + i + " = " + start + "; " + i + comparison + n + "; " + i + step + ")\n";

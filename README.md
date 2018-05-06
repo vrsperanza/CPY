@@ -119,6 +119,14 @@ Simplified for sintax:
 		...
 	//Iterates i from a up to b-1, 1 at a time
 	
+	rof i a
+		...
+	//Iterates i from a down to a, 1 at a time
+	
+	rof i a b
+		...
+	//Iterates i from a down to b, 1 at a time
+	
 	for i a b c
 		...
 	//Iterates i from a up to b-1, c at a time
@@ -128,7 +136,7 @@ Simplified for sintax:
 	//Iterates i from a down to b, c at a time
 	
 	//The standard sintax still works normally
-	for float i = a; i <= b; i += 0.5
+	for i = (float)a; i <= b; i += 0.5
 		...
 	//Iterates i from a up to b 0.5 at a time
 ```
