@@ -39,7 +39,7 @@ int string_isSubstring(const char* mainStr, const string& subStr){
     return -1;
 }
 
-int string_isWord(const char* mainStr, const string& subStr, string separators){
+int string_isWord(const char* mainStr, const string& subStr, const string& separators){
     int aux;
     for(aux = 0; mainStr[aux] != '\0'; aux++){
 		if(aux-1 == -1 || stringContainsChar(separators, mainStr[aux-1])){
