@@ -7,6 +7,7 @@
 using namespace std;
 
 bool isWhitespace(const string& s, string ignore=whiteSpace);
+string trimLeadingWhitespace(const string& s, string whitespace=" \t\n");
 string removeTrailingWhitespace(string& s, string whitespace=" \t\n");
 char strsub(const char* a, const char* b, int as);
 int string_isSubstring(const char* mainStr, const string& subStr);
