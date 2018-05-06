@@ -7,10 +7,7 @@ using namespace std;
 
 
 bool stringContainsChar(const string& s, const char& check){
-	for(char c : s)
-		if(c == check)
-			return true;
-	return false;
+	return s.find_first_of(check) != std::string::npos;
 }
 
 bool stringContainsChars(const string& s1, const string& s2){
@@ -74,32 +71,14 @@ int string_isWord(const char* mainStr, const string& subStr, string separators){
 }
 
 void strInsert(char* dest, const char* insert, int index){
-	char destCpy[LINESZ];
-	strcpy(destCpy, dest);
-	int len = strlen(insert);
-	int i;
-	for(i = index; dest[i] != '\0'; i++){
-		dest[i + len] = destCpy[i];
-	}	
-	dest[i + len + 1] = '\0';
-	
-	for(i = 0; insert[i] != '\0'; i++){
-		dest[i+index] = insert[i];
-	}
+	std::string strInsert(insert);
+	stringInsert(dest, strInsert, index);
 }
 
 void stringInsert(char* dest, const string& insert, int index){
-	char destCpy[LINESZ];
-	strcpy(destCpy, dest);
-	int len = insert.size();
-	int i;
-	for(i = index; dest[i] != '\0'; i++){
-		dest[i + len] = destCpy[i];
-	}	
-	dest[i + len] = '\0';
-	for(i = 0; i < insert.size(); i++){
-		dest[i+index] = insert[i];
-	}
+	std::string strDest(dest);
+	strDest.insert(index, insert);
+	strcpy(dest,strDest.c_str());
 }
 
 void getStructName(const char* line, char* buffer){
@@ -133,9 +112,7 @@ bool isEmptyLine(const char* line){
 }
 
 bool structHasTypedef(const char* line){
-	if(string_isSubstring(line, "typedef") >= 0)
-		return true;
-	return false;
+	return string_isSubstring(line, "typedef") >= 0;
 }
 
 void stringToLower(char * s){
