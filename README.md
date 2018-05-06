@@ -161,7 +161,7 @@ Flags:
         -s: Silent compilation, only prints errors
         -ex: Exports project to a directory containing only c++ source and a Makefile
         -r: Automatically runs compiled code
-		-ni: Disables variable implication
+	-ni: Disables variable implication
         -nc: Doesn't compile resulting code
         -o target: Specifies target executable name, when not specified target = a
         -OtherFlags: Redirects flag to underlying compiler (g++)
