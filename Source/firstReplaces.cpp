@@ -603,7 +603,7 @@ void makeMultipleReturnAssignments(char * input){
 	}
 	
 	for(int i = 0; i < words.size(); i++){
-		words[i] = removeTrailingWhitespace(words[i]);
+		words[i] = removeStartEndWhitespace(words[i]);
 		if(words[i] == "_")
 			continue;
 		result += offSet + words[i] + " = get<" + to_string(i) + ">(unpackingFunctionArguments)\n";
@@ -630,7 +630,7 @@ void implyMultipleReturnValues(char * line){
 		result += line[j];
 	result += "make_tuple(";
 	for(string word : words)
-		result += removeTrailingWhitespace(word) + ", ";
+		result += removeStartEndWhitespace(word) + ", ";
 	result[result.size()-2] = ')';
 	result[result.size()-1] = '\n';
 	strcpy(line, result.c_str());	

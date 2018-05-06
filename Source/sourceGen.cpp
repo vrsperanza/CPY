@@ -206,7 +206,7 @@ void implyVariablesType(char * line){
 	int whiteSpaceID = 0;
 	string type = "";
 	for(int id = 0; id < wordGroups.size(); id++){
-		if(wordGroups[id].size() == 1 && (removeTrailingWhitespace(firstSplit[whiteSpaceID]) == "," || removeTrailingWhitespace(firstSplit[whiteSpaceID]) == ";" || removeTrailingWhitespace(firstSplit[whiteSpaceID]) == "") && type == "known"){
+		if(wordGroups[id].size() == 1 && (removeStartEndWhitespace(firstSplit[whiteSpaceID]) == "," || removeStartEndWhitespace(firstSplit[whiteSpaceID]) == ";" || removeStartEndWhitespace(firstSplit[whiteSpaceID]) == "") && type == "known"){
 			seenWords.back().insert(wordGroups[id][0]);
 			wordGroups[id][0] = "";
 			if(whiteSpaceID+2 < firstSplit.size())

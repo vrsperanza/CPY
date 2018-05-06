@@ -17,8 +17,10 @@ string trimLeadingWhitespace(const string& s, string whitespace){
 	return result.erase(0, result.find_first_not_of(whitespace));
 }
 
-string removeTrailingWhitespace(string& s, string whitespace){
-	return s.erase(s.find_last_not_of(whitespace) + 1);
+string removeStartEndWhitespace(string& s, string whitespace){
+	s.erase(0, s.find_first_not_of(whitespace));
+	s.erase(s.find_last_not_of(whitespace) + 1);
+	return s;
 }
 
 char strsub(const char* a, const char* b, int as){
