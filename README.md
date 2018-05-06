@@ -27,21 +27,6 @@ With the use of a flag (-ex) generates a c++ project folder, makefile included, 
 Implies semicolons from endlines,
 Implies {} using identation,
 
-Can imply variable types from assignment:
-```
-a = 10
-b = a
-//Declares a and b as integers
-```
-
-Sometimes you don't want to declare a new instance of a not directly visible variable, this the known tag was created
-```
-void Rectangle::set_values (int w, h)
-	known width = w
-	known height = h
-//This will tell the compiler width and height are inside the Rectangle namespace, thus not implying variable declaration
-```
-
 Can return multiple values from functions:
 ```
 operations(int a, b)
@@ -62,14 +47,40 @@ main()
 //The last variables can be omitted if not necessary
 ```
 
+Can optionally imply variable types from assignment:
+```
+a = 10
+b = a
+//Declares a and b as integers
+```
+
+Sometimes you don't want to declare a new instance of a not directly visible variable, to adress this issue the known tag was created
+```
+void Rectangle::set_values (int w, h)
+	known width = w
+	known height = h
+//This will tell the compiler width and height are inside the Rectangle namespace, thus not implying variable declaration
+```
+
+In case the known tag is a problem, or variable implication is simply not to your liking, it can be completely disabled by using the -ni flag
+
+Can deduce function type from return value:
+```
+sum(int a, b)
+	return a + b
+//Is equivalent to:
+int sum(int a, b)
+	return a + b
+```
+
 Implies function argument types based on previous:
 ```
-int somefunction(string a, b)
+somefunction(string a, b)
 	code...
 //Declares a and b as strings
 ```
 
-Can imply parenthesis on if, switch, for and while:
+Optionally implies parenthesis on if, switch, for and while:
 ```
 	if x > 0
 		...
@@ -84,13 +95,6 @@ Can imply parenthesis on if, switch, for and while:
 			...
 			break
 		...
-```
-
-Can imply ">>" and "<<" on cin, cout and cerr
-```
-	cin a b
-	cout a b endl
-	cerr a b endl
 ```
 
 Four new print functions:
@@ -157,6 +161,7 @@ Flags:
         -s: Silent compilation, only prints errors
         -ex: Exports project to a directory containing only c++ source and a Makefile
         -r: Automatically runs compiled code
+		-ni: Disables variable implication
         -nc: Doesn't compile resulting code
         -o target: Specifies target executable name, when not specified target = a
         -OtherFlags: Redirects flag to underlying compiler (g++)

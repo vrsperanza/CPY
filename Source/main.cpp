@@ -39,6 +39,7 @@ void printHelp(){
 	printf("\t-cl: Clean compilation, deletes CompilationSource before compiling\n");
 	printf("\t-ex: Exports project to a directory containing only c++ source and a Makefile\n");
 	printf("\t-r: Automatically runs compiled code\n");
+	printf("\t-ni: Disables variable implication\n");
 	printf("\t-nc: Doesn't compile resulting code\n");
 	printf("\t-o target: Specifies target executable name, when not specified target = a\n");
 	printf("\t-OtherFlags: Redirects flag to underlying compiler\n");
