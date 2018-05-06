@@ -17,14 +17,14 @@ bool stringContainsChars(const string& s1, const string& s2){
 	return false;
 }
 
-bool isWhitespace(const string& s, string ignore){
+bool isWhitespace(const string& s, const string& ignore){
 	for(char c : s)
 		if(ignore.find(c) == string::npos)
 			return false;
 	return true;
 }
 
-string removeStartEndWhitespace(string& s, string whitespace){
+string removeStartEndWhitespace(const string& s, const string& whitespace){
 	int i = 0;
 	while(stringContainsChar(whitespace, s[i])) i++;
 	
@@ -54,7 +54,7 @@ int string_isSubstring(const char* mainStr, const string& subStr){
     return -1;
 }
 
-int string_isWord(const char* mainStr, const string& subStr, string separators){
+int string_isWord(const char* mainStr, const string& subStr, const string& separators){
     int aux;
     for(aux = 0; mainStr[aux] != '\0'; aux++){
 		if(aux-1 == -1 || stringContainsChar(separators, mainStr[aux-1])){
