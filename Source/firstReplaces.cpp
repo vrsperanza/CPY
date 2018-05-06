@@ -79,8 +79,14 @@ void forLoopParse(char * line){
 	
 	i = words[3];
 	if(words.size() < 7){
-		start = "0";
-		n = words[5];
+		if(rof){
+			start = words[5];
+			n = "0";
+		}
+		else {
+			start = "0";
+			n = words[5];
+		}
 		
 		if(rof)
 			comparison = " >= ";
