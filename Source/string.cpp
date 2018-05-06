@@ -12,11 +12,6 @@ bool isWhitespace(const string& s, string ignore){
 	return stringContainsChars(s, ignore);
 }
 
-string trimLeadingWhitespace(const string& s, string whitespace){
-	auto result = s;
-	return result.erase(0, result.find_first_not_of(whitespace));
-}
-
 string removeStartEndWhitespace(string& s, string whitespace){
 	s.erase(0, s.find_first_not_of(whitespace));
 	s.erase(s.find_last_not_of(whitespace) + 1);
