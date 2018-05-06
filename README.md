@@ -125,11 +125,11 @@ Simplified for sintax:
 	
 	rof i a
 		...
-	//Iterates i from a down to a, 1 at a time
+	//Iterates i from a down to b, 1 at a time
 	
 	rof i a b
 		...
-	//Iterates i from a down to b, 1 at a time
+	//Iterates i from a down to b, c at a time
 	
 	for i a b c
 		...
