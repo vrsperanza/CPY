@@ -356,7 +356,7 @@ bool replaceRawIncludesInner(const char * filename){
 				}
 			}
 			else {
-				printf("Raw include file not found: %s", includeName);
+				printf("Raw include file not found: %s", includeName.c_str());
 			}
 		}
 		else
