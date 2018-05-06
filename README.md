@@ -109,14 +109,28 @@ Four new print functions:
 	//arg1 = ContentOfArg1 | arg2 = ContentOfArg2 | arg3 = ContentOfArg3
 ```
 
-Two new loop functions:
+Simplified for sintax:
 ```
-	for i n
+	for i a
 		...
-	//Iterates i from 0 (or assigned value) to n-1, 1 at a time
-	rof i n
+	//Iterates i from 0 up to a, 1 at a time
+	
+	for i a b
 		...
-	//Iterates i from n-1 to 0 (or assigned value), 1 at a time
+	//Iterates i from a up to b-1, 1 at a time
+	
+	for i a b c
+		...
+	//Iterates i from a up to b-1, c at a time
+	
+	for i a b -c
+		...
+	//Iterates i from a down to b, c at a time
+	
+	//The standard sintax still works normally
+	for float i = a; i <= b; i += 0.5
+		...
+	//Iterates i from a up to b 0.5 at a time
 ```
 
 New precompilation tag: #raw "file"

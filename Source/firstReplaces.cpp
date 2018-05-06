@@ -44,79 +44,54 @@ void treatLineEndings(const char * filename){
 }
 
 void forLoopParse(char * line){
+	if(stringContainsChars(line, ";:,><"))
+		return;
+	
 	vector<string> words = smartSplitWords(line, "for", " \t\n,;()=", true);
 	if(words.size() == 0)
 		return;
 	
 	if(isWhitespace(words[words.size()-1], " \t\n,;()")) words.pop_back();
 	
-	string offSet = words[0];
-	string i;
-	string n;
-	string equity = "0";
-	
-	for(int i = 0; i < words.size(); i++){
-		if(removeTrailingWhitespace(words[i], " \t\n,;()") == "="){
-			if(words.size() <= i+1){
-				printf("LINE: %s ends in incomplete equity", line);
-				exit(0);
-			}
-			equity = words[i+1];
-			words.erase(words.begin()+i,words.begin()+i+2);
-			break;
-		}
-	}
-	
-	if(words.size() == 6){
-		i = words[3];
-		n = words[5];
-		string result = "";
-		int pos = 0;
-		while(line[pos] == ' ' || line[pos] == '\t') result += line[pos++];
-		
-		result += "for(" + i + " = " + equity + "; " + i + " < " + n + "; " + i + "++)\n";
-		
-		strcpy(line, result.c_str());
-		return;
-	}
-}
-
-void rofLoopParse(char * line){
-	vector<string> words = smartSplitWords(line, "rof", " \t\n,;()=", true);
-	if(words.size() == 0)
-		return;
-	
-	if(isWhitespace(words[words.size()-1], " \t\n,;()")) words.pop_back();
 	
 	string offSet = words[0];
 	string i;
 	string n;
-	string equity = "0";
+	string step;
+	string start;
+	string comparison;
 	
-	for(int i = 0; i < words.size(); i++){
-		if(removeTrailingWhitespace(words[i], " \t\n,;()") == "="){
-			if(words.size() <= i+1){
-				printf("LINE: %s ends in incomplete equity", line);
-				exit(0);
-			}
-			equity = words[i+1];
-			words.erase(words.begin()+i,words.begin()+i+2);
-			break;
-		}
-	}
-	
-	if(words.size() == 6){
-		i = words[3];
+	i = words[3];
+	if(words.size() < 7){
+		start = "0";
 		n = words[5];
-		string result = "";
-		int pos = 0;
-		while(line[pos] == ' ' || line[pos] == '\t') result += line[pos++];
-		
-		result += "for(" + i + " = " + n + " - 1; " + i + " >= " + equity + "; " + i + "--)\n";
-		
-		strcpy(line, result.c_str());
-		return;
+		comparison = " < ";
 	}
+	else{
+		start = words[5];
+		n = words[7];
+	}
+	if(words.size() > 11){
+		
+		step = " " + words[9] + "= " + words[11];
+		if(words[9] == "-")
+			comparison = " >= ";
+		else
+			comparison = " < ";
+	}
+	else if(words.size() > 9){
+		step = " += " + words[9];
+		comparison = " < ";
+	}
+	else{
+		step = "++";
+		comparison = " < ";
+	}
+	
+	string result = words[0] + "for(" + i + " = " + start + "; " + i + comparison + n + "; " + i + step + ")\n";
+	
+	strcpy(line, result.c_str());
+	return;
 }
 
 void exclamationPrintParse(char * line){
@@ -640,7 +615,6 @@ void finalLineReplaces(const char * filename){
 		implyMultipleReturnValues(line);
 		makeMultipleReturnAssignments(line);
 		forLoopParse(line);
-		rofLoopParse(line);
 		fprintf(output, "%s", line);
 	}
 	fclose(input);

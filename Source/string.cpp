@@ -13,7 +13,7 @@ bool stringContainsChar(string s, char check){
 	return false;
 }
 
-bool stringContainsChar(string s1, string s2){
+bool stringContainsChars(string s1, string s2){
 	for(char c : s1)
 		if(s2.find_first_of(c) != string::npos)
 			return true;

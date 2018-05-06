@@ -5,7 +5,7 @@ using namespace std
 
 genArray(int size, maxVal)
 	arr = (int*)malloc(size * sizeof(int));
-	for(i = 0; i < size; i++);
+	for i size
 		arr[i] = rand()%maxVal
 	return arr
 
@@ -13,7 +13,7 @@ findBiggestSmallest(int * arr, int size)
 	max = arr[0]
 	min = arr[0];
 	
-	for i = 0; i < size; i++
+	for i size
 		if arr[i] > max
 			max = arr[i]
 		

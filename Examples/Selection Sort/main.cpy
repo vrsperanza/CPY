@@ -20,12 +20,12 @@ int * genArray(int size)
 	arr = (int*)malloc(sizeof(int) * size)
 	
 	//i does the same, becoming an integer
-	for i = 0; i < size; i++
+	for i size
 		arr[i] = rand()%size
 	return arr
 
 void printArray(int * arr, int size)
-	for i = 0; i < size; i++
+	for i size
 		cout << arr[i] << " "
 	cout << endl
 	

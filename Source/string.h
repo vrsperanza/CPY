@@ -16,6 +16,7 @@ void getStructName(char * line, char * buffer);
 bool isEmptyLine(char * line);
 bool structHasTypedef(char * line);
 bool stringContainsChar(string s, char check);
+bool stringContainsChars(string s, string s2);
 void stringToLower(char * s);
 int string_isWord(char* mainStr, string subStr, string separators=wordSeparators);
 
