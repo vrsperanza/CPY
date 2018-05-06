@@ -17,7 +17,7 @@ bool isEmptyLine(const char* line);
 bool structHasTypedef(const char* line);
 bool stringContainsChar(const string& s, const char& check);
 bool stringContainsChars(const string& s1, const string& s2);
-void stringToLower(char * s);
+void stringToLower(char* s);
 int string_isWord(const char* mainStr, const string& subStr, const string& separators=wordSeparators);
 
 #endif

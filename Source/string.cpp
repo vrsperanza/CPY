@@ -1,36 +1,22 @@
-#include <string>
-using namespace std;
-
-#include "defines.h"
 #include "string.h"
-
-
 
 bool stringContainsChar(const string& s, const char& check){
 	return s.find_first_of(check) != std::string::npos;
 }
 
 bool stringContainsChars(const string& s1, const string& s2){
-	for(char c : s1)
-		if(s2.find_first_of(c) != string::npos)
-			return true;
-	return false;
+	return s1.find(s2) != std::string::npos;
 }
 
 bool isWhitespace(const string& s, const string& ignore){
-	for(char c : s)
-		if(ignore.find(c) == string::npos)
-			return false;
-	return true;
+	return stringContainsChars(s, ignore);
 }
 
 string removeStartEndWhitespace(const string& s, const string& whitespace){
-	int i = 0;
-	while(stringContainsChar(whitespace, s[i])) i++;
-	
-	int j = s.size()-1;
-	while(stringContainsChar(whitespace, s[j])) j--;
-	return s.substr(i, j-i+1);
+	auto input = s;
+	input.erase(0, input.find_first_not_of(whitespace));
+	input.erase(input.find_last_not_of(whitespace) + 1);
+	return input;
 }
 
 char strsub(const char* a, const char* b, int as){
@@ -92,7 +78,7 @@ void getStructName(const char* line, char* buffer){
 	i--;
 	
 	if(spc != 2){
-		printf("typedef struct name not properly specified\n%d\n", line);
+		printf("typedef struct name not properly specified\n%s\n", line);
 		exit(0);
 	}
 	
@@ -115,7 +101,7 @@ bool structHasTypedef(const char* line){
 	return string_isSubstring(line, "typedef") >= 0;
 }
 
-void stringToLower(char * s){
+void stringToLower(char* s){
 	for(int i = 0; s[i]; i++)
 		s[i] = tolower(s[i]);
 }
