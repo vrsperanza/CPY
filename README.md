@@ -5,7 +5,7 @@ To compile cpy files use the created executable targeting the main file of the r
 
 ```
 CPY is a (Pre)Compiler of .cpy files, those are basically C++ without redundancy.
-	Curly brackets are implied from identation
+	Curly brackets are implied from indentation
 	Semicolons are implied from line breaks (lines must be marked to continue, not to break)
 	Headers are interpreted from the sources and includes
 	Can return multiple values from functions
