@@ -28,6 +28,7 @@ bool compile = true;
 bool silent = false;
 bool exportProject = false;
 bool cleanCompilation = false;
+bool implyVariables = true;
 
 void printHelp(){
 	printf("USAGE: cpy SourceCode Flags\n");
@@ -142,6 +143,8 @@ int main(int argc, char ** argv){
 		} else if(strcmp("-r", argument) == 0 || strcmp("-run", argument) == 0){
 			run = true;
 			compile = true;
+		} else if(strcmp("-ni", argument) == 0|| strcmp("-noimplication", argument) == 0){
+			implyVariables = false;
 		} else if(strcmp("-nc", argument) == 0|| strcmp("-nocompile", argument) == 0){
 			compile = false;
 			run = false;
@@ -201,7 +204,7 @@ int main(int argc, char ** argv){
 		if(!fileExist(cppFile)){
 			if(fileExist(cpyFile)){
 				firstReplaces(cpyFile);
-				generateSource(cpyFile, cppFile, beauty);
+				generateSource(cpyFile, cppFile, beauty, implyVariables);
 				allowedHeaders.insert(fileName);
 			}
 		} else {
@@ -209,7 +212,7 @@ int main(int argc, char ** argv){
 				if(fileModifiedTime(cppFile) < fileModifiedTime(cpyFile)){
 					remove(cppFile);
 					firstReplaces(cpyFile);
-					generateSource(cpyFile, cppFile, beauty);
+					generateSource(cpyFile, cppFile, beauty, implyVariables);
 					allowedHeaders.insert(fileName);
 				}
 			}

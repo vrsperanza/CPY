@@ -366,7 +366,7 @@ int placeLineEnding(char * line){
 	return last;
 }
 
-void generateSource(char * inputFile, char * outputFile, bool beauty){
+void generateSource(char * inputFile, char * outputFile, bool beauty, bool implyVariables){
 	input = fopen(inputFile, "r");
 	output = fopen(outputFile, "w+");
 	
@@ -494,7 +494,9 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
 			
 			outScopeAmount = closeKeys(offset, beauty);			
 		}
-		implyVariablesType(buffPrevious);
+		
+		if(implyVariables)
+			implyVariablesType(buffPrevious);
 		while(outScopeAmount--)
 			seenWords.pop_back();
 		
@@ -512,7 +514,8 @@ void generateSource(char * inputFile, char * outputFile, bool beauty){
     }
 	
 	int outScopeAmount = closeKeys(0, beauty);
-	implyVariablesType(buffPrevious);
+	if(implyVariables)
+		implyVariablesType(buffPrevious);
 	while(outScopeAmount--)
 		seenWords.pop_back();
 	fputs(emptyLinesBuffPrevious, output);
