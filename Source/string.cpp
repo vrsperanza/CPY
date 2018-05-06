@@ -24,7 +24,7 @@ bool isWhitespace(const string& s, string ignore){
 	return true;
 }
 
-string removeTrailingWhitespace(string& s, string whitespace){
+string removeStartEndWhitespace(string& s, string whitespace){
 	int i = 0;
 	while(stringContainsChar(whitespace, s[i])) i++;
 	
