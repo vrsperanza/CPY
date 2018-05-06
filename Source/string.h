@@ -12,7 +12,6 @@ char strsub(const char* a, const char* b, int as);
 int string_isSubstring(const char* mainStr, const string& subStr);
 void strInsert(char* dest, const char* insert, int index);
 void stringInsert(char* dest, const string& insert, int index);
-void implyFunctionParametersType(char * s);
 void getStructName(const char* line, char* buffer);
 bool isEmptyLine(const char* line);
 bool structHasTypedef(const char* line);

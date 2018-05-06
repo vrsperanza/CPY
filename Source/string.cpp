@@ -8,14 +8,15 @@ bool stringContainsChars(const string& s1, const string& s2){
 	return s1.find(s2) != std::string::npos;
 }
 
-bool isWhitespace(const string& s, string ignore){
+bool isWhitespace(const string& s, const string& ignore){
 	return stringContainsChars(s, ignore);
 }
 
-string removeStartEndWhitespace(string& s, string whitespace){
-	s.erase(0, s.find_first_not_of(whitespace));
-	s.erase(s.find_last_not_of(whitespace) + 1);
-	return s;
+string removeStartEndWhitespace(const string& s, const string& whitespace){
+	auto input = s;
+	input.erase(0, input.find_first_not_of(whitespace));
+	input.erase(input.find_last_not_of(whitespace) + 1);
+	return input;
 }
 
 char strsub(const char* a, const char* b, int as){
