@@ -5,7 +5,6 @@ class Rectangle
 	int width, height;
 	public:
 	set_values(int x, y)
-		known width, height
 		width = x
 		height = y
 		
