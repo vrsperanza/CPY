@@ -480,7 +480,7 @@ bool getRawStringEndSequence(const char * ptr, char endSeq[20]){
 
 */
 void removeComments(const char * filename){
-	FILE * input = fopen(filename, "r");
+	FILE * input = fopen(filename, "rb");
 	if(input == NULL)
 		return;
 
@@ -563,7 +563,7 @@ void removeComments(const char * filename){
 			*q++ = *p++; // copy char to dst and increment src and dst pointers
 	}
 
-	FILE * output = fopen(tempFile, "w");
+	FILE * output = fopen(tempFile, "wb");
 	fwrite(dst, 1, strlen(dst), output);
 	fclose(output);
 	remove(filename);
