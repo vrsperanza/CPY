@@ -345,7 +345,8 @@ bool replaceRawIncludesInner(const char * filename){
 			int i = 0;
 			while(aspCnt < 2 && line[i] != '\0')
 				if(line[i++] == '\"')
-					aspCnt++;			
+					aspCnt++;
+			
 			if(line[i] != '\n')
 				while(line[i] != '\0')
 					fprintf(output, "%c", line[i++]);
@@ -408,6 +409,167 @@ void joinContinuedLines(const char * filename){
 	rename(tempFile, filename);
 	return;
 	
+}
+
+int getLineNumber(const char * ptr, const char * str){
+	const char * p = str;
+	int line = 1;
+	while(p != ptr){
+		if(*p == '\n') line++;
+		p++;
+	}
+	return line;
+}
+
+// see http://en.cppreference.com/w/cpp/language/string_literal
+// input: ptr points to opening '"'
+// prefixR"delimiter(raw_characters)delimiter"
+//        ^ptr
+bool isRawStringLiteral(const char * ptr, const char * str){
+	const char * p = ptr;
+	if(*p != '"' || p == str || p[-1] != 'R') return false;
+
+	// figure out if we have valid prefix (L,u,U,u8)
+	p--; // p now points to 'R'
+	while(p >= str && (isalnum(*p) || *p=='_')) p--;
+	p++;
+	// now p points to start of prefix:
+	// u8R"...
+	// ^p^ptr-1	   (ptr-1-p) is length of prefix
+	if(ptr-1-p > 2) return false; // invalid prefix - too long
+	if(ptr-1-p == 2) return *p=='u' && p[1]=='8';
+	if(ptr-1-p == 1) return *p=='u' || *p=='U' || *p=='L';
+	return true; // ptr-1-p == 0, no prefix
+}
+
+// endSeq = )delimiter"
+// max length of endSeq is 16+2=18 chars (not counting terminating null)
+// input: ptr points to opening '"'
+bool getRawStringEndSequence(const char * ptr, char endSeq[20]){
+	const char * p = ptr;
+	if(*p != '"') return false;
+	p++;
+	ptr++;
+	// now p and ptr point to start of delimiter or '(' if there is no delimiter
+	while(*p && !(*p=='('||*p==')'||*p=='\\'||isspace(*p))) p++;
+	// now p points to '('
+	if(p-ptr > 16) return false; // delimiter too long
+	if(*p != '(') return false;
+
+	endSeq[0] = ')';
+	memcpy(endSeq+1, ptr, p-ptr); // copy delimiter to endSeq
+	endSeq[p-ptr+1] = '"';
+	endSeq[p-ptr+2] = 0;
+	return true;
+}
+
+/*
+ removeComments() does not handle line continuations, so it should be called after joinContinuedLines()
+
+ removeComments() correctly handles /* and // inside char/string literals except these cases:
+
+ - #include"..." is treated as normal string with escapes, which is not standard-compliant (see q-char-sequence in the C11 standard http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf);
+   #include<...> is not treated as string, so // and /* inside <...> will start a comment
+
+ - unclosed char/string literals in inactive preprocessor blocks (warning in g++, error in cpy):
+   #if 0
+   "/*
+   #endif
+
+ - probably in some other nontrivial interactions of strings and comments with preprocessor
+
+*/
+void removeComments(const char * filename){
+	FILE * input = fopen(filename, "rb");
+	if(input == NULL)
+		return;
+
+	// read entire input file into src
+	fseek(input, 0, SEEK_END);
+	int size = ftell(input); // input file size
+	fseek(input, 0, SEEK_SET);
+	char* src = (char*)malloc(size+1);
+	fread(src, 1, size, input);
+	src[size] = 0; // null-terminate src
+	fclose(input);
+
+	char* dst = (char*)calloc(size+1,1); // cannot be larger than src
+	char* p = src;
+	char* q = dst;
+
+	while(*p){
+		if(*p == '/'){
+			p++; // skip '/'
+			if(*p == '/'){ // line comment
+				p++; // skip '/'
+				while(*p && *p != '\n') p++; // skip everything until eof or eol, don't skip eol
+			}
+			else if(*p == '*'){ // block comment
+				p++; // skip '*'
+				char* end = strstr(p, "*/");
+				if(end){
+					*q++ = ' '; // block comment is replaced with a single space char: "int/**/a" -> "int a", not "inta"
+					p = end + 2;
+				}
+				else{ // unclosed block comment
+					printf("%s:%d: error: unclosed block comment\n", filename, getLineNumber(p,src));
+					exit(1);
+				}
+			}
+			else
+				*q++ = '/'; // not a comment - just copy '/' to dst
+		}
+		else if(*p == '"' || *p == '\''){ // string or char literal
+			if(isRawStringLiteral(p,src)){
+				char endSeq[20] = {0};
+				if(!getRawStringEndSequence(p,endSeq)){
+					printf("%s:%d: error: invalid raw string literal\n", filename, getLineNumber(p,src));
+					exit(1);
+				}
+				char* end = strstr(p, endSeq);
+				if(!end){
+					printf("%s:%d: error: unclosed raw string literal\n", filename, getLineNumber(p,src));
+					exit(1);
+				}
+				end += strlen(endSeq);
+				// copy entire contents of raw string to dst
+				memcpy(q, p, end-p);
+				q += end-p;
+				p = end;
+			}
+			else{
+				char c = *p;
+				char* start = p;
+				*q++ = *p++; // copy opening quote
+				while(*p){
+					if(*p == '\\'){ // copy \ and char that follows it
+						*q++ = *p++;
+						if(!*p) break;
+						*q++ = *p++;
+						continue;
+					}
+					else if(*p == c || *p == '\n') break;
+					*q++ = *p++;
+				}
+				if(*p == c)
+					*q++ = *p++; // copy closing quote
+				else{ // *p == 0 (eof) or *p == '\n' (eol)
+					printf("%s:%d: error: unclosed character or string literal\n", filename, getLineNumber(start,src));
+					exit(1);
+				}
+			}
+		}
+		else
+			*q++ = *p++; // copy char to dst and increment src and dst pointers
+	}
+
+	FILE * output = fopen(tempFile, "wb");
+	fwrite(dst, 1, strlen(dst), output);
+	fclose(output);
+	remove(filename);
+	rename(tempFile, filename);
+	free(src);
+	free(dst);
 }
 
 void formatLineSpacing(char * line){
@@ -660,6 +822,7 @@ void firstReplaces(const char * filename){
 	treatLineEndings(filename);
 	replaceRawIncludes(filename);
 	joinContinuedLines(filename);
+	removeComments(filename);
 	treatCurlyBrackets(filename);
 	replaceQuickPrints(filename);
 	formatSpacing(filename);
