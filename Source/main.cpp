@@ -122,7 +122,7 @@ int main(int argc, char ** argv){
 	
 	//Process Arguments
 	if(argc < 2){
-		printf("USAGE: %s SourceCode Flags\n", argv[0]);
+		printHelp();
 		exit(0);
 	}
 	
