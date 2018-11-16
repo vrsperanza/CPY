@@ -54,9 +54,18 @@ b = a
 //Declares a and b as integers
 ```
 
-Sometimes you don't want to declare a new instance of a not directly visible variable, to adress this issue the known tag was created
+In order not to deduce the type of a directly visible variable or of a class constructor, the known tag was created
 ```
-void Rectangle::set_values (int w, h)
+class Rectangle
+	int width, height;
+	public:
+	
+	known Rectangle()
+		width = 20
+		height = 10
+//This will declare a Rectangle constructor
+		
+void Rectangle::set_values(int w, h)
 	known width = w
 	known height = h
 //This will tell the compiler width and height are inside the Rectangle namespace, thus not implying variable declaration

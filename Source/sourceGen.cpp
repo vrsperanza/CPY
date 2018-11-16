@@ -112,7 +112,29 @@ void implyFunction(char * s){
 		string_isWord(s, "struct") != -1 ||
 		string_isWord(s, "typedef") != -1)
 		return;
-		
+	
+	
+	bool cancel = false;
+	bool skipSplit = false;
+	vector<string> split = smartSplitWords(s, "", wordSeparators, true);
+	string result = "";
+	for(string word : split){
+		if(word == "known"){
+			cancel = true;
+			skipSplit = true;
+		}
+		else{
+			if(!skipSplit)
+				result += word;
+			skipSplit = false;
+		}
+	}
+	
+	if(cancel){
+		strcpy(s, result.c_str());
+		return;
+	}
+	
 	char lastType[LINESZ];
 	lastType[0] = '\0';
 	int typeStartIndex = 0;
