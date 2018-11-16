@@ -98,7 +98,13 @@ void smartCompilation(map<string, vector<string> > dependenceMap, string mainFil
 	//Link all objects into the desired executable
 	string trueTarget = "../" + target;
 	if(someObjectUpdated || !fileExist((trueTarget + ".exe").c_str())){
+		
+		#ifdef _WIN32
+		compilation += "-o " + trueTarget + " ";
+		#else	
 		compilation += "-o " + target + " ";
+		#endif
+
 		for(string object : generatedObjects){
 			compilation += object + ".o ";
 		}
